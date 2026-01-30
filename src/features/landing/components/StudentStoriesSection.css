@@ -1,0 +1,241 @@
+.stories-section {
+    padding: 5rem 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+}
+
+.stories-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: center;
+    max-width: 835px;
+}
+
+.success-tag {
+    background: #E8DAFF;
+    color: #9747FF;
+    padding: 5px 20px;
+    border-radius: 38px;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stories-title {
+    font-weight: 700;
+    font-size: 40px;
+    color: #000000;
+    margin: 0;
+}
+
+.stories-subtitle {
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #000000;
+    margin: 0;
+}
+
+/* Marquee Styles */
+.stories-marquee-container {
+    width: 100%;
+    overflow: hidden;
+    padding: 1rem 0;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.stories-marquee-track {
+    display: flex;
+    gap: 30px;
+    width: max-content;
+    animation: scroll 60s linear infinite;
+    padding-left: 30px;
+}
+
+.stories-marquee-track:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Card Base */
+.story-card {
+    flex: 0 0 auto;
+    width: 320px;
+    height: 500px;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+/* Inner Card Styles */
+.story-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+}
+
+@media (hover: hover) {
+    .story-card:hover .story-card-inner {
+        transform: rotateY(180deg);
+    }
+}
+
+.story-card-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.story-card-front,
+.story-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.story-card-front {
+    background-color: #fff;
+}
+
+.story-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+.story-card-back {
+    /* Base style, colors applied via modifier classes */
+    color: white;
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1.5rem;
+}
+
+/* Color Cycle Gradients */
+.card-violet {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.card-orange {
+    background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+.card-green {
+    background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+}
+
+.card-blue {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.story-review {
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.story-meta {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.story-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.story-uni {
+    font-size: 14px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-start-journey {
+    background: #2D83F2;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
+    .stories-section {
+        padding: 3rem 1rem;
+        gap: 2rem;
+    }
+
+    .stories-title {
+        font-size: 28px;
+    }
+
+    .stories-subtitle {
+        font-size: 14px;
+        margin-bottom: 1rem;
+    }
+
+    .btn-start-journey {
+        padding: 0.75rem 2rem;
+        font-size: 16px;
+        margin-top: 1rem;
+    }
+
+    .story-card {
+        width: 260px;
+        height: 380px;
+    }
+
+    .story-card-back {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+
+    .story-review {
+        font-size: 15px;
+    }
+
+    .story-name {
+        font-size: 18px;
+    }
+
+    .story-uni {
+        font-size: 12px;
+    }
+}
