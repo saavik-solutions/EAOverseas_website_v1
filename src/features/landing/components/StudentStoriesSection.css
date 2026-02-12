@@ -1,252 +1,51 @@
-.stories-section {
-    padding: 6rem 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    font-family: 'Inter', sans-serif;
-    display: flex;
-    justify-content: center;
-    background-color: transparent;
-    /* Assuming white or transparent from screenshot */
-}
-
-.stories-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 4rem;
-}
-
-/* Left Content */
-.stories-content {
-    flex: 1;
-    max-width: 500px;
-}
-
-.stories-title {
-    font-size: 56px;
-    font-weight: 800;
-    line-height: 1.1;
-    color: #111;
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.02em;
-}
-
-.stories-description {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 2.5rem;
-    line-height: 1.6;
-    max-width: 400px;
-}
-
-.btn-view-stories {
-    background-color: #3B82F6;
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.btn-view-stories:hover {
-    background-color: #2563EB;
-}
-
-/* Right Visuals */
-.stories-visuals {
-    flex: 1;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 600px;
-    /* Adjust as needed */
-}
-
-.pill-decoration {
-    position: absolute;
-    width: 140px;
-    height: 48px;
-    border-radius: 24px;
-    z-index: 0;
-}
-
-.pill-top {
-    top: 50px;
-    right: 180px;
-    /* Adjust based on exact positioning */
-    background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
-    /* Galaxy-like dark blue */
-}
-
-.stories-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-}
-
-/* Pill Cards */
-.story-pill-card {
-    width: 240px;
-    /* Approximate width from screenshot */
-    height: 400px;
-    /* Approximate height */
-    border-radius: 120px;
-    /* Full pill shape */
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.story-pill-card:hover {
-    transform: translateY(-5px);
-}
-
-.story-pill-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.story-pill-info {
-    position: absolute;
-    top: 2rem;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    color: white;
-    padding: 0 1rem;
-    z-index: 2;
-}
-
-.story-pill-name {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 0.25rem 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.story-pill-uni {
-    font-size: 13px;
-    opacity: 0.9;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.story-pill-country {
-    font-size: 11px;
-    opacity: 0.8;
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Specialized Overlays for pills if images don't have them */
-.card-blue::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(59, 130, 246, 0.4), rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.4));
-    pointer-events: none;
-}
-
-.card-green::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(34, 197, 94, 0.4), rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.4));
-    pointer-events: none;
-}
-
-/* Positioning specific cards to look staggered if needed, 
-   but screenshot shows them fairly aligned vertically, maybe slightly offset?
-   Let's just stack them for now or add a slight margin to one. 
-*/
-.stories-stack> :nth-child(2) {
-    margin-top: -100px;
-    /* Overlap or stagger logic */
-    /* Screenshot: 
-       Top card (Manisha) seems higher up.
-       Bottom card (Manish) seems lower down.
-       They might be side-by-side or stacked. 
-       The prompt says "staggering their vertical positions".
-       Let's try a vertical overlap or just simple stacking. 
-       Actually, from the screenshot description `Right aligned vertical stack`, 
-       and `Refining Student Stories Layout` history (staggering vertical positions).
-    */
-    margin-left: 80px;
-    /* Shift the second card to the right? */
-}
-
-/* Adjusting layout for the specific screenshot look */
-.stories-stack {
-    display: block;
-    /* Use absolute positioning for precise control */
-    width: 400px;
-    height: 600px;
-}
-
-.story-pill-card {
-    position: absolute;
-}
-
-.story-pill-card:nth-child(1) {
-    top: 0;
-    left: 40px;
-}
-
-.story-pill-card:nth-child(2) {
-    top: 250px;
-    left: 120px;
-    /* Offset to right */
-    z-index: 2;
-}
-
-@media (max-width: 1024px) {
-    .stories-container {
-        flex-direction: column;
-        text-align: center;
-        gap: 3rem;
+/* Keyframe for auto-scrolling animation */
+@keyframes slide {
+    0% {
+        transform: translateX(0);
     }
 
-    .stories-content {
-        margin: 0 auto;
-    }
-
-    .stories-description {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .stories-visuals {
-        height: 600px;
-        /* Maintain height for pills */
-        width: 100%;
+    100% {
+        transform: translateX(-50%);
     }
 }
 
-@media (max-width: 640px) {
-    .stories-title {
-        font-size: 36px;
-    }
+/* Flip Card Styles */
+.perspective {
+    perspective: 1500px;
+}
 
-    .story-pill-card {
-        width: 180px;
-        height: 300px;
-    }
+.transform-style-3d {
+    transform-style: preserve-3d;
+}
 
-    .story-pill-card:nth-child(2) {
-        top: 200px;
-        left: 80px;
-    }
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+.group:hover .group-hover\:rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+.animate-slide {
+    animation: slide 35s linear infinite;
+}
+
+/* Pause animation on hover */
+.animate-slide:hover {
+    animation-play-state: paused;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
 }

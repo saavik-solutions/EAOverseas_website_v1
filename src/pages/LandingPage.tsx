@@ -17,7 +17,7 @@ import studentStoryHero from '../assets/student_story_hero.png';
 // import loanHeroImage from '../assets/loan_hero.png'; // Using placeholder div for now or I can import if I copied it? I copied 'loan_hero.png' in previous step? Wait, I did NOT copy loan_hero.png in previous step I think? I copied `destinations` and `student`. 
 // Ah, step 2228 was `copy ... loan_hero.png`. Yes I did.
 import loanHeroImage from '../assets/loan_hero.png';
-import mainHeroImage from '../assets/student_standing.png';
+import mainHeroImage from '../assets/hero_mobile_cartoon.png';
 import mobileHeroImage from '../assets/hero_mobile_cartoon.png';
 import whatsappIcon from '../assets/icon_whatsapp.png';
 import story1 from '../assets/story_card_manisha.jpg';
@@ -172,11 +172,11 @@ const LandingPage = () => {
             </div>
 
             {/* Right Side - 3 Pill Layout (Exact Match) */}
-            <div className="flex-1 flex justify-center items-center w-full relative mt-12 md:mt-0 pt-16 md:pt-12">
-                <div className="relative flex items-start justify-center gap-4 md:gap-6">
+            <div className="flex-1 flex justify-center items-center w-full relative mt-0 md:mt-0 pt-0 md:pt-12">
+                <div className="relative flex items-start justify-center gap-2 md:gap-6">
 
                     {/* Decorative Top Horizontal Pill - Galaxy Texture */}
-                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-40 h-9 rounded-full shadow-2xl z-0 overflow-hidden bg-[#020617] border border-blue-900/30">
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-7 md:h-9 rounded-full shadow-2xl z-0 overflow-hidden bg-[#020617] border border-blue-900/30">
                         {/* Deep Space Background */}
                         <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#1e1b4b] to-[#312e81] opacity-100"></div>
 
@@ -196,14 +196,14 @@ const LandingPage = () => {
 
                     {/* Left Pill (Manisha) - High */}
                     <div className="relative group z-10">
-                        <div className="w-24 sm:w-32 md:w-40 h-64 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-blue-200">
+                        <div className="w-20 sm:w-32 md:w-40 h-56 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-blue-200">
                             <img src={story1} alt="Student Story 1" className="w-full h-full object-cover" />
                         </div>
                     </div>
 
-                    {/* Center Pill (Manish) - Low (Shifted Down) & Lighting Effect */}
-                    <div className="relative mt-12 md:mt-16 z-10 group">
-                        <div className="w-24 sm:w-32 md:w-40 h-64 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-gray-900 relative">
+                    {/* Center Pill (Manish) - Low (Reduced Stagger on Mobile) & Lighting Effect */}
+                    <div className="relative mt-2 md:mt-16 z-10 group">
+                        <div className="w-20 sm:w-32 md:w-40 h-56 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-gray-900 relative">
                             <img src={story2} alt="Student Story 2" className="w-full h-full object-cover grayscale-[10%] contrast-110" />
                             {/* Enhanced Blue/Red Split Lighting Effect Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-red-600/50 mix-blend-overlay pointer-events-none"></div>
@@ -213,11 +213,11 @@ const LandingPage = () => {
 
                     {/* Right Pill (Sanjukta) - High */}
                     <div className="relative group z-10">
-                        <div className="w-24 sm:w-32 md:w-40 h-64 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-green-100">
+                        <div className="w-20 sm:w-32 md:w-40 h-56 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-green-100">
                             <img src={story3} alt="Student Story 3" className="w-full h-full object-cover" />
                         </div>
                         {/* Decorative Bottom Horizontal Pill */}
-                        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-40 h-9 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full opacity-90 shadow-lg z-20">
+                        <div className="absolute -bottom-14 md:-bottom-16 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-7 md:h-9 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full opacity-90 shadow-lg z-20">
                             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 rounded-full"></div>
                         </div>
                     </div>
@@ -233,7 +233,7 @@ const LandingPage = () => {
                         element.scrollIntoView({ behavior: 'smooth' });
                     }
                 }}
-                className="md:hidden bg-[#2D83F2] hover:bg-blue-600 text-white text-sm font-bold py-3 px-8 rounded-lg transition-all shadow-md mt-6 w-full max-w-sm"
+                className="md:hidden bg-[#2D83F2] hover:bg-blue-600 text-white text-sm font-bold py-3 px-8 rounded-lg transition-all shadow-md mb-8 w-full max-w-sm"
             >
                 View Student Stories
             </button>

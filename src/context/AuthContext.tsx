@@ -1,25 +1,47 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
-const AuthContext = createContext(null);
+interface User {
+    id: string;
+    name: string;
+    email: string;
+    role?: string;
+    isDemo?: boolean;
+    createdAt?: string;
+    [key: string]: any;
+}
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+interface AuthContextType {
+    user: User | null;
+    login: (email: string, password: string) => Promise<User>;
+    signup: (userDetails: any) => Promise<User>;
+    logout: () => void;
+    loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Check local storage for persistent session
         const storedUser = localStorage.getItem('eaoverseas_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Failed to parse stored user", e);
+            }
         }
         setLoading(false);
     }, []);
 
-    const login = (email, password) => {
+    const login = (email: string, password: string): Promise<User> => {
         return new Promise((resolve, reject) => {
             // ADMIN LOGIN (Full/Demo Mode)
             if (email === 'alex.j@example.com' && password === '5678') {
-                const adminUser = {
+                const adminUser: User = {
                     id: 'USER_ADMIN_001',
                     name: 'Alex Johnson',
                     email: 'alex.j@example.com',
@@ -33,7 +55,7 @@ export const AuthProvider = ({ children }) => {
 
             // COUNSELLOR LOGIN (Demo Mode)
             if (email === 'partner@counsellor.com' && password === 'COUNSELLOR2026') {
-                const counsellorUser = {
+                const counsellorUser: User = {
                     id: 'USER_COUNSELLOR_001',
                     name: 'Dr. Alex Morgan',
                     email: 'partner@counsellor.com',
@@ -48,12 +70,12 @@ export const AuthProvider = ({ children }) => {
 
             // CHECK REGISTERED USERS
             const registeredUsers = JSON.parse(localStorage.getItem('eaoverseas_registered_users') || '[]');
-            const foundUser = registeredUsers.find(u => u.email === email && u.password === password);
+            const foundUser = registeredUsers.find((u: any) => u.email === email && u.password === password);
 
             if (foundUser) {
                 // Ensure isDemo is false for real users
-                const realUser = { ...foundUser, isDemo: false };
-                delete realUser.password; // Don't store password in session
+                const realUser: User = { ...foundUser, isDemo: false };
+                delete (realUser as any).password; // Don't store password in session
                 setUser(realUser);
                 localStorage.setItem('eaoverseas_user', JSON.stringify(realUser));
                 resolve(realUser);
@@ -63,9 +85,9 @@ export const AuthProvider = ({ children }) => {
         });
     };
 
-    const signup = (userDetails) => {
+    const signup = (userDetails: any): Promise<User> => {
         return new Promise((resolve) => {
-            const newUser = {
+            const newUser: User = {
                 ...userDetails,
                 id: `USER_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
                 isDemo: false, // Fresh account
@@ -79,7 +101,7 @@ export const AuthProvider = ({ children }) => {
 
             // Auto login
             const sessionUser = { ...newUser };
-            delete sessionUser.password;
+            delete (sessionUser as any).password;
             setUser(sessionUser);
             localStorage.setItem('eaoverseas_user', JSON.stringify(sessionUser));
 
@@ -99,4 +121,10 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
