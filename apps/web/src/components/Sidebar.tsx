@@ -62,10 +62,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     {navItems.map((item) => {
                         let isActive = currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path));
 
-                        // Show items but guard them
-                        // However, per user request, hide "extra" items for guests to keep it clean.
-                        const guestHiddenPaths = ['/dashboard', '/test-prep', '/loans', '/visas', '/consultant', '/ai-profile', '/profile'];
-                        if (!user && guestHiddenPaths.includes(item.path)) return null;
+                        // Show all items for guests per latest request
 
                         // Keep Global Feed active when viewing an institution profile
                         if (item.path === '/feed' && currentPath.startsWith('/institution/')) isActive = true;
@@ -89,12 +86,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                             <button
                                 key={item.name}
                                 onClick={() => {
-                                    if (!user && guestHiddenPaths.includes(item.path)) {
-                                        requireAuth(() => navigate(item.path));
-                                    } else {
-                                        navigate(item.path);
-                                        if (window.innerWidth < 1024) onClose();
-                                    }
+                                    navigate(item.path);
+                                    if (window.innerWidth < 1024) onClose();
                                 }}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-colors ${isActive
                                     ? 'bg-blue-50 text-blue-600 font-semibold'
@@ -130,14 +123,20 @@ const Sidebar = ({ isOpen, onClose }) => {
                                 <div className="p-1">
 
                                     <button
-                                        onClick={() => requireAuth(() => navigate('/notification-preferences'))}
+                                        onClick={() => {
+                                            navigate('/notification-preferences');
+                                            if (window.innerWidth < 1024) onClose();
+                                        }}
                                         className="w-full text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors flex items-center gap-3"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">notifications</span>
                                         Notification Preferences
                                     </button>
                                     <button
-                                        onClick={() => requireAuth(() => navigate('/privacy-security'))}
+                                        onClick={() => {
+                                            navigate('/privacy-security');
+                                            if (window.innerWidth < 1024) onClose();
+                                        }}
                                         className="w-full text-left px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors flex items-center gap-3"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">security</span>
