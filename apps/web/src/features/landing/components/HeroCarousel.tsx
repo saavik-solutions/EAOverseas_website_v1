@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './HeroCarousel.css';
 
-const HeroCarousel = ({ slides, interval = 3000 }) => {
+interface HeroCarouselProps {
+    slides: React.ReactNode[];
+    interval?: number;
+}
+
+const HeroCarousel = ({ slides, interval = 3000 }: HeroCarouselProps) => {
     // Create extended slides: [Last, 1, 2, ..., Last, First]
     // This allows seamless transition from Last -> First (Forward) and First -> Last (Backward)
     const extendedSlides = [slides[slides.length - 1], ...slides, slides[0]];
@@ -49,7 +54,7 @@ const HeroCarousel = ({ slides, interval = 3000 }) => {
         }
     };
 
-    const handleDotClick = (index) => {
+    const handleDotClick = (index: number) => {
         setIsTransitioning(true);
         setCurrentIndex(index + 1); // Map visual index 0..N to extended 1..N+1
         startInterval(); // Reset timer on interaction

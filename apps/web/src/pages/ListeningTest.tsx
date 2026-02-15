@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 const ListeningTest = () => {
     const navigate = useNavigate();
-    const [answers, setAnswers] = useState({});
-    const [score, setScore] = useState(null);
+    const [answers, setAnswers] = useState<Record<number | string, string>>({});
+    const [score, setScore] = useState<number | null>(null);
     const [currentPart, setCurrentPart] = useState(1);
 
     // Strict Exam Mode State
@@ -131,7 +131,7 @@ const ListeningTest = () => {
     };
 
     // Allow seeking
-    const handleProgressClick = (e) => {
+    const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (audioRef.current && duration) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -152,7 +152,7 @@ const ListeningTest = () => {
         }
     };
 
-    const formatTime = (time) => {
+    const formatTime = (time: number) => {
         if (!time) return "00:00";
         const mins = Math.floor(time / 60);
         const secs = Math.floor(time % 60);
@@ -233,7 +233,7 @@ const ListeningTest = () => {
         if (currentPart > 1) setCurrentPart(prev => prev - 1);
     };
 
-    const handleAnswerChange = (id, value) => {
+    const handleAnswerChange = (id: number | string, value: string) => {
         setAnswers(prev => ({ ...prev, [id]: value }));
     };
 

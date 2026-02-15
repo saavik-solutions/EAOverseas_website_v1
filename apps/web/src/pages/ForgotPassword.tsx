@@ -14,7 +14,7 @@ const ForgotPassword = () => {
     // Hardcoded verification code for demo
     const DEMO_CODE = '123456';
 
-    const handleSendCode = (e) => {
+    const handleSendCode = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
@@ -34,7 +34,7 @@ const ForgotPassword = () => {
         }, 1500);
     };
 
-    const handleCodeChange = (index, value) => {
+    const handleCodeChange = (index: number, value: string) => {
         if (value.length > 1) return; // Prevent multiple chars
 
         const newCode = [...code];
@@ -48,14 +48,14 @@ const ForgotPassword = () => {
         }
     };
 
-    const handleKeyDown = (index, e) => {
+    const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
         if (e.key === 'Backspace' && !code[index] && index > 0) {
             const prevInput = document.getElementById(`code-${index - 1}`);
             if (prevInput) prevInput.focus();
         }
     };
 
-    const handleVerify = async (e) => {
+    const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         const enteredCode = code.join('');
@@ -176,7 +176,7 @@ const ForgotPassword = () => {
                                             key={index}
                                             id={`code-${index}`}
                                             type="text"
-                                            maxLength="1"
+                                            maxLength={1}
                                             value={digit}
                                             onChange={(e) => handleCodeChange(index, e.target.value)}
                                             onKeyDown={(e) => handleKeyDown(index, e)}

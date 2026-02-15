@@ -7,22 +7,22 @@ import AboutUsSection from '../features/landing/components/AboutUsSection';
 import TeamSection from '../features/landing/components/TeamSection';
 import ConsultantCTA from '../features/landing/components/ConsultantCTA';
 import Footer from '../components/Footer';
-import HeroCarousel from '../features/landing/components/HeroCarousel'; // Imported new component
+import HeroCarousel from '../features/landing/components/HeroCarousel';
 import ConsultationBookingModal from '../components/ConsultationBookingModal';
 import { useNavigate } from 'react-router-dom';
 
 // Import assets
 import destinationsHero from '../assets/destinations_hero.png';
 import studentStoryHero from '../assets/student_story_hero.png';
-// import loanHeroImage from '../assets/loan_hero.png'; // Using placeholder div for now or I can import if I copied it? I copied 'loan_hero.png' in previous step? Wait, I did NOT copy loan_hero.png in previous step I think? I copied `destinations` and `student`. 
-// Ah, step 2228 was `copy ... loan_hero.png`. Yes I did.
 import loanHeroImage from '../assets/loan_hero.png';
 import mainHeroImage from '../assets/hero_mobile_cartoon.png';
 import mobileHeroImage from '../assets/hero_mobile_cartoon.png';
 import whatsappIcon from '../assets/icon_whatsapp.png';
-import story1 from '../assets/story_card_manisha.jpg';
-import story2 from '../assets/story_card_manish.jpg';
-import story3 from '../assets/story_card_sanjukta.jpg';
+import story1 from '../assets/g1.png';
+import story2 from '../assets/b 1.png';
+import story3 from '../assets/g 2.png';
+import topBar from '../assets/sq 1.png';
+import bottomBar from '../assets/sq 2.png';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -56,7 +56,7 @@ const LandingPage = () => {
                 {/* <img src={mainHeroImage} alt="Discover the Future" className="hidden md:block w-full max-w-md object-contain hover:scale-105 transition-transform duration-500" /> */}
 
                 {/* Mobile Cartoon Image */}
-                <img src={mobileHeroImage} alt="Discover the Future" className="block md:hidden w-[85%] sm:w-4/5 max-w-[340px] object-contain hover:scale-105 transition-transform duration-500" />
+                <img src={mobileHeroImage} alt="Discover the Future" className="block md:hidden w-[85%] sm:w-4/5 max-w-[340px] object-contain" />
             </div>
 
             {/* Mobile Button - Below Image */}
@@ -92,8 +92,8 @@ const LandingPage = () => {
                     Explore the Loan Calculator
                 </button>
             </div>
-            <div className="flex-1 flex justify-center mt-0 md:-mt-12 w-full">
-                <img src={loanHeroImage} alt="Loan Options" className="w-[90%] sm:w-4/5 md:w-full max-w-[380px] md:max-w-md object-contain hover:scale-105 transition-transform duration-500" />
+            <div className="flex-1 flex justify-center mt-4 md:mt-0 w-full">
+                <img src={loanHeroImage} alt="Loan Options" className="w-[85%] sm:w-[80%] md:w-full max-w-[400px] md:max-w-md max-h-[400px] md:max-h-[500px] object-contain" />
             </div>
 
             {/* Mobile Button - Below Image */}
@@ -129,7 +129,7 @@ const LandingPage = () => {
                 </button>
             </div>
             <div className="flex-1 flex justify-center mt-0 md:-mt-12 w-full">
-                <img src={destinationsHero} alt="Destinations Collage" className="w-[90%] sm:w-4/5 md:w-full max-w-[380px] md:max-w-md object-contain hover:scale-105 transition-transform duration-500" />
+                <img src={destinationsHero} alt="Destinations Collage" className="w-[90%] sm:w-4/5 md:w-full max-w-[380px] md:max-w-md object-contain" />
             </div>
 
             {/* Mobile Button - Below Image */}
@@ -172,53 +172,34 @@ const LandingPage = () => {
             </div>
 
             {/* Right Side - 3 Pill Layout (Exact Match) */}
-            <div className="flex-1 flex justify-center items-center w-full relative mt-0 md:mt-0 pt-0 md:pt-12">
-                <div className="relative flex items-start justify-center gap-2 md:gap-6">
-
-                    {/* Decorative Top Horizontal Pill - Galaxy Texture */}
-                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-7 md:h-9 rounded-full shadow-2xl z-0 overflow-hidden bg-[#020617] border border-blue-900/30">
-                        {/* Deep Space Background */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#1e1b4b] to-[#312e81] opacity-100"></div>
-
-                        {/* Nebula Clouds */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-transparent mix-blend-overlay"></div>
-
-                        {/* Stars Texture */}
-                        <div className="absolute inset-0 opacity-70" style={{
-                            backgroundImage: 'radial-gradient(white 1px, transparent 1px), radial-gradient(white 0.5px, transparent 0.5px)',
-                            backgroundSize: '16px 16px, 8px 8px',
-                            backgroundPosition: '0 0, 4px 4px'
-                        }}></div>
-
-                        {/* Glow */}
-                        <div className="absolute -bottom-2 -right-2 w-16 h-16 bg-blue-500/30 blur-xl rounded-full"></div>
-                    </div>
-
-                    {/* Left Pill (Manisha) - High */}
-                    <div className="relative group z-10">
-                        <div className="w-20 sm:w-32 md:w-40 h-56 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-blue-200">
-                            <img src={story1} alt="Student Story 1" className="w-full h-full object-cover" />
+            <div className="flex-1 flex justify-center items-center w-full relative mt-0 md:mt-0 pt-10 md:pt-20">
+                <div className="relative flex items-start justify-center gap-4 sm:gap-6 md:gap-8">
+                    {/* Left Pill - High */}
+                    <div className="relative group z-10 shrink-0">
+                        <div className="w-24 sm:w-32 md:w-44 h-56 sm:h-80 md:h-[420px] rounded-full overflow-hidden shadow-2xl">
+                            <img src={story1} alt="Student Story Left" className="w-full h-full object-cover" />
                         </div>
                     </div>
 
-                    {/* Center Pill (Manish) - Low (Reduced Stagger on Mobile) & Lighting Effect */}
-                    <div className="relative mt-2 md:mt-16 z-10 group">
-                        <div className="w-20 sm:w-32 md:w-40 h-56 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-gray-900 relative">
-                            <img src={story2} alt="Student Story 2" className="w-full h-full object-cover grayscale-[10%] contrast-110" />
-                            {/* Enhanced Blue/Red Split Lighting Effect Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-red-600/50 mix-blend-overlay pointer-events-none"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-80"></div>
+                    {/* Center Pill - Low */}
+                    <div className="relative mt-8 md:mt-24 z-10 group shrink-0">
+                        {/* Decorative Top Horizontal Pill - Now relative to Center Pill */}
+                        <div className="absolute -top-8 md:-top-14 left-1/2 transform -translate-x-1/2 w-24 md:w-32 h-6 md:h-8 rounded-full shadow-xl z-0 overflow-hidden border border-white/10">
+                            <img src={topBar} alt="Top Decor" className="w-full h-full object-contain" />
+                        </div>
+                        <div className="w-24 sm:w-32 md:w-44 h-56 sm:h-80 md:h-[420px] rounded-full overflow-hidden shadow-2xl relative">
+                            <img src={story2} alt="Student Story Center" className="w-full h-full object-cover" />
                         </div>
                     </div>
 
-                    {/* Right Pill (Sanjukta) - High */}
-                    <div className="relative group z-10">
-                        <div className="w-20 sm:w-32 md:w-40 h-56 sm:h-80 md:h-96 rounded-[100px] overflow-hidden shadow-xl border-4 border-white transition-transform duration-500 hover:-translate-y-2 bg-green-100">
-                            <img src={story3} alt="Student Story 3" className="w-full h-full object-cover" />
+                    {/* Right Pill - High */}
+                    <div className="relative group z-10 shrink-0">
+                        <div className="w-24 sm:w-32 md:w-44 h-56 sm:h-80 md:h-[420px] rounded-full overflow-hidden shadow-2xl">
+                            <img src={story3} alt="Student Story Right" className="w-full h-full object-cover" />
                         </div>
                         {/* Decorative Bottom Horizontal Pill */}
-                        <div className="absolute -bottom-14 md:-bottom-16 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-7 md:h-9 bg-gradient-to-r from-purple-600 to-pink-500 rounded-full opacity-90 shadow-lg z-20">
-                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 rounded-full"></div>
+                        <div className="absolute -bottom-14 md:-bottom-20 left-1/2 transform -translate-x-1/2 w-24 md:w-32 h-6 md:h-8 rounded-full opacity-90 shadow-xl z-20 overflow-hidden border border-white/10">
+                            <img src={bottomBar} alt="Bottom Decor" className="w-full h-full object-contain" />
                         </div>
                     </div>
 
@@ -324,16 +305,16 @@ const LandingPage = () => {
                 <div className="w-full mt-8">
                     <SupportSection onScheduleClick={() => setIsBookingModalOpen(true)} />
                 </div>
+
             </main>
 
-            {/* Full Width Sections */}
             <DestinationsSection />
             <StudentStoriesSection />
             <AboutUsSection />
             <TeamSection />
             <ConsultantCTA />
             <Footer />
-        </div>
+        </div >
     );
 };
 

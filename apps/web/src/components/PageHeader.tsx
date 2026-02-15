@@ -4,7 +4,18 @@ import { useNotification } from '../context/NotificationContext';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from './NotificationDropdown';
 
-const PageHeader = ({ title, actions, breadcrumbs = [] }) => {
+interface Breadcrumb {
+    label: string;
+    link?: string;
+}
+
+interface PageHeaderProps {
+    title?: string;
+    actions?: React.ReactNode;
+    breadcrumbs?: Breadcrumb[];
+}
+
+const PageHeader: React.FC<PageHeaderProps> = ({ title, actions, breadcrumbs = [] }) => {
     const navigate = useNavigate();
     const { unreadCount } = useNotification();
     const { logout, user } = useAuth();

@@ -27,7 +27,7 @@ const FeedDetails = () => {
         setTimeout(() => setCopyBtnText('Copy Link'), 2000);
     };
 
-    const shareToSocial = (platform) => {
+    const shareToSocial = (platform: string) => {
         const shareLink = `https://eaoverseas.com/s/${data.id}-scholarship-2025`;
         const shareUrl = encodeURIComponent(shareLink);
         const title = encodeURIComponent(data.title);

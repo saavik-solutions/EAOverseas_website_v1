@@ -7,8 +7,8 @@ const ReadingTest = () => {
     const navigate = useNavigate();
     const [currentPassage, setCurrentPassage] = useState(1);
     const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes
-    const [answers, setAnswers] = useState({});
-    const [markedForReview, setMarkedForReview] = useState([]); // Changed to array
+    const [answers, setAnswers] = useState<Record<number | string, string>>({});
+    const [markedForReview, setMarkedForReview] = useState<(number | string)[]>([]); // Changed to array
     const [showSubmitModal, setShowSubmitModal] = useState(false); // New state
 
     // Debugging logs
@@ -50,17 +50,17 @@ const ReadingTest = () => {
         }
     }, [timeLeft]); // Dependency on timeLeft
 
-    const formatTime = (seconds) => {
+    const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
-    const handleAnswerChange = (questionId, value) => {
+    const handleAnswerChange = (questionId: number | string, value: string) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
-    const toggleMarkForReview = (questionId) => {
+    const toggleMarkForReview = (questionId: number | string) => {
         setMarkedForReview(prev => {
             if (prev.includes(questionId)) { // Changed from .has() to .includes()
                 return prev.filter(id => id !== questionId);
