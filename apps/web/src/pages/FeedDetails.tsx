@@ -1,11 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { postsData } from '../data/mockFeedData';
+import { useAuth } from '../context/AuthContext';
+import { useSavedItems } from '../context/SavedItemsContext';
 
 const FeedDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const data = useMemo(() => postsData[id] || postsData['daad'], [id]);
+    const { requireAuth } = useAuth();
+    const { togglePost, isPostSaved } = useSavedItems();
+    const data = useMemo(() => postsData[id || ''] || postsData['daad'], [id]);
 
     // Share Modal State
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -63,6 +67,12 @@ const FeedDetails = () => {
         if (data.applyLink && data.applyLink !== '#') {
             navigate(data.applyLink);
         }
+    };
+
+    const handleSave = () => {
+        requireAuth(() => {
+            togglePost(data);
+        });
     };
 
     const downloadGuide = () => {
@@ -175,9 +185,14 @@ Good luck!
                                                 <span className="material-symbols-outlined text-[18px] md:text-[20px]">share</span>
                                                 Share
                                             </button>
-                                            <button className="px-3 py-1.5 md:px-4 md:py-2 bg-white border border-gray-200 text-gray-900 font-medium rounded-lg hover:bg-gray-50 hover:text-primary transition-colors flex items-center gap-1.5 md:gap-2 text-xs md:text-sm shadow-sm flex-1 md:flex-none justify-center">
-                                                <span className="material-symbols-outlined text-[18px] md:text-[20px]">bookmark_border</span>
-                                                Save
+                                            <button
+                                                onClick={handleSave}
+                                                className={`px-3 py-1.5 md:px-4 md:py-2 bg-white border font-medium rounded-lg transition-colors flex items-center gap-1.5 md:gap-2 text-xs md:text-sm shadow-sm flex-1 md:flex-none justify-center ${isPostSaved(data) ? 'text-blue-600 border-blue-200 bg-blue-50' : 'text-gray-900 border-gray-200 hover:bg-gray-50 hover:text-primary'}`}
+                                            >
+                                                <span className={`material-symbols-outlined text-[18px] md:text-[20px] ${isPostSaved(data) ? '!fill-current' : ''}`}>
+                                                    {isPostSaved(data) ? 'bookmark' : 'bookmark_border'}
+                                                </span>
+                                                {isPostSaved(data) ? 'Saved' : 'Save'}
                                             </button>
                                             {data.applyLink && data.applyLink !== '#' && (
                                                 <button onClick={handleApply} className="px-4 py-1.5 md:px-6 md:py-2.5 bg-blue-600 text-white font-medium rounded-lg flex items-center gap-1.5 md:gap-2 text-xs md:text-sm flex-1 md:flex-none justify-center">
