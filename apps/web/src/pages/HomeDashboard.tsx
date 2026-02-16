@@ -9,7 +9,7 @@ const HomeDashboard = () => {
     const navigate = useNavigate();
     const { user, requireAuth } = useAuth();
     const { userProfile, updatePreferences } = useUserProfile();
-    const { savedColleges, savedCourses, savedAccommodations } = useSavedItems();
+    const { savedColleges, savedCourses, savedAccommodations, savedPosts } = useSavedItems();
 
     // Expense Data Configuration
     const EXPENSE_DATA = {
@@ -602,6 +602,28 @@ const HomeDashboard = () => {
                                     </div>
                                     <div className="absolute top-1/2 -translate-y-1/2 right-[-20px] opacity-5 group-hover:opacity-10 transition-opacity">
                                         <span className="material-symbols-outlined !text-[100px] md:!text-[140px] text-blue-600">school</span>
+                                    </div>
+                                </div>
+
+                                {/* Saved Posts */}
+                                <div
+                                    onClick={() => requireAuth(() => navigate('/saved-posts'))}
+                                    className="flex-1 bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between relative overflow-hidden gap-4"
+                                >
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className="size-10 md:size-16 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm shrink-0">
+                                            <span className="material-symbols-outlined !text-[24px] md:!text-[40px]">dynamic_feed</span>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 text-sm md:text-lg leading-tight">Saved Posts</h4>
+                                            <p className="text-xs text-gray-400 mt-0.5">View saved articles</p>
+                                        </div>
+                                    </div>
+                                    <div className="relative z-10 self-end sm:self-auto">
+                                        <span className="font-bold text-gray-900 text-lg md:text-2xl">{savedPosts ? savedPosts.length : 0}</span>
+                                    </div>
+                                    <div className="absolute top-1/2 -translate-y-1/2 right-[-20px] opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <span className="material-symbols-outlined !text-[100px] md:!text-[140px] text-emerald-600">dynamic_feed</span>
                                     </div>
                                 </div>
                             </div>

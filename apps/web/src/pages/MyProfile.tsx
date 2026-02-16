@@ -250,6 +250,18 @@ const MyProfile = () => {
                                     </div>
                                     <span className="material-symbols-outlined text-[#60728a] text-[20px] group-hover:translate-x-1 transition-transform">chevron_right</span>
                                 </Link>
+
+                                {/* Item 6: Saved Posts */}
+                                <Link to="/saved-posts" className="group flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition-colors last:border-0">
+                                    <div className="flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0 size-10">
+                                        <span className="material-symbols-outlined text-[20px]">dynamic_feed</span>
+                                    </div>
+                                    <div className="flex flex-col flex-1 min-w-0">
+                                        <p className="text-[#111418] text-sm font-bold leading-normal truncate">Saved Posts</p>
+                                        <p className="text-[#60728a] text-xs font-normal leading-normal truncate">View saved articles</p>
+                                    </div>
+                                    <span className="material-symbols-outlined text-[#60728a] text-[20px] group-hover:translate-x-1 transition-transform">chevron_right</span>
+                                </Link>
                             </div>
                         </div>
                     </div>

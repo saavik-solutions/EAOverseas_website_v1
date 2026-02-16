@@ -14,6 +14,12 @@ interface Course {
     [key: string]: any;
 }
 
+interface SavedPost {
+    id: string;
+    title: string;
+    [key: string]: any;
+}
+
 interface Accommodation {
     id: string;
     title: string;
@@ -65,6 +71,7 @@ interface SavedItemsContextType {
     isCourseSaved: (course: Course) => boolean;
     isAccommodationSaved: (acc: Accommodation) => boolean;
     savedAccommodations: Accommodation[];
+    savedPosts: SavedPost[];
     myApplications: Application[];
     withdrawApplication: (id: number) => void;
     submitApplication: (appData: any) => void;
@@ -89,6 +96,7 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const [savedColleges, setSavedColleges] = useState<College[]>([]);
     const [savedCourses, setSavedCourses] = useState<Course[]>([]);
     const [savedAccommodations, setSavedAccommodations] = useState<Accommodation[]>([]);
+    const [savedPosts, setSavedPosts] = useState<SavedPost[]>([]);
     const [myApplications, setMyApplications] = useState<Application[]>([]);
 
     // Load data when user changes
@@ -111,6 +119,9 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
             const accommodations = localStorage.getItem(`savedAccommodations_${user.email}`);
             setSavedAccommodations(accommodations ? JSON.parse(accommodations) : []);
+
+            const posts = localStorage.getItem(`savedPosts_${user.email}`);
+            setSavedPosts(posts ? JSON.parse(posts) : []);
 
             const applications = localStorage.getItem(`myApplications_${user.email}`);
             setMyApplications(applications ? JSON.parse(applications) : []);
@@ -137,6 +148,12 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             localStorage.setItem(`savedAccommodations_${user.email}`, JSON.stringify(savedAccommodations));
         }
     }, [savedAccommodations, user?.email]);
+
+    useEffect(() => {
+        if (user?.email) {
+            localStorage.setItem(`savedPosts_${user.email}`, JSON.stringify(savedPosts));
+        }
+    }, [savedPosts, user?.email]);
 
     useEffect(() => {
         if (user?.email) {
@@ -263,6 +280,7 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             isCourseSaved,
             isAccommodationSaved,
             savedAccommodations,
+            savedPosts,
             myApplications,
             withdrawApplication,
             submitApplication,
