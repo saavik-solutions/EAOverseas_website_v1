@@ -537,11 +537,11 @@ const HomeDashboard = () => {
                         {/* Saved Items Component Box */}
                         <div className="bg-white rounded-xl border border-gray-100 p-4 md:p-6 shadow-sm h-full flex flex-col gap-4 md:gap-6">
 
-                            <div className="flex flex-col gap-2 flex-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 flex-1">
                                 {/* Row 1: Saved Accommodation (Full Width) */}
                                 <div
                                     onClick={() => requireAuth(() => navigate('/saved-accommodations'))}
-                                    className="flex-1 bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between relative overflow-hidden gap-4"
+                                    className="bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex items-center justify-between relative overflow-hidden gap-4"
                                 >
                                     <div className="flex items-center gap-4 relative z-10">
                                         <div className="size-10 md:size-16 rounded-xl bg-white text-orange-600 flex items-center justify-center shadow-sm shrink-0">
@@ -564,7 +564,7 @@ const HomeDashboard = () => {
                                 {/* Saved Courses */}
                                 <div
                                     onClick={() => requireAuth(() => navigate('/saved-courses'))}
-                                    className="flex-1 bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between relative overflow-hidden gap-4"
+                                    className="bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex items-center justify-between relative overflow-hidden gap-4"
                                 >
                                     <div className="flex items-center gap-4 relative z-10">
                                         <div className="size-10 md:size-16 rounded-xl bg-white text-purple-600 flex items-center justify-center shadow-sm shrink-0">
@@ -586,7 +586,7 @@ const HomeDashboard = () => {
                                 {/* Saved Colleges */}
                                 <div
                                     onClick={() => requireAuth(() => navigate('/saved-colleges'))}
-                                    className="flex-1 bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between relative overflow-hidden gap-4"
+                                    className="bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex items-center justify-between relative overflow-hidden gap-4"
                                 >
                                     <div className="flex items-center gap-4 relative z-10">
                                         <div className="size-10 md:size-16 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm shrink-0">
@@ -608,7 +608,7 @@ const HomeDashboard = () => {
                                 {/* Saved Posts */}
                                 <div
                                     onClick={() => requireAuth(() => navigate('/saved-posts'))}
-                                    className="flex-1 bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between relative overflow-hidden gap-4"
+                                    className="bg-gray-50 rounded-xl p-3 md:p-5 hover:bg-gray-100 transition-colors cursor-pointer group flex items-center justify-between relative overflow-hidden gap-4"
                                 >
                                     <div className="flex items-center gap-4 relative z-10">
                                         <div className="size-10 md:size-16 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm shrink-0">
