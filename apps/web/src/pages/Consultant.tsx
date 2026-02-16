@@ -9,7 +9,6 @@ const Consultant = () => {
     // State for form interaction (basic mock state)
     const [consultationType, setConsultationType] = useState('shortlisting');
     const [mode, setMode] = useState('video');
-    const [selectedDate, setSelectedDate] = useState('today'); // today, tomorrow
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isChatActive, setIsChatActive] = useState(false);
@@ -58,10 +57,8 @@ const Consultant = () => {
         // Create immediate booking details so the "Start Chat" button appears
         const now = new Date();
 
-        // Calculate session date based on selection
-        const sessionDate = selectedDate === 'tomorrow'
-            ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
-            : now;
+        // Calculate session date (defaulting to today now that selection is removed)
+        const sessionDate = now;
 
         const hours = now.getHours();
         const minutes = now.getMinutes();
@@ -87,7 +84,7 @@ const Consultant = () => {
             studentId: studentId,
             studentEmail: user?.email || 'alex@example.com',
             date: sessionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            dateLabel: selectedDate === 'today' ? 'Today' : 'Tmrw',
+            dateLabel: 'Today',
             time: currentTimeStr,
             topic: typeTitles[consultationType],
             mode: mode,
@@ -233,33 +230,6 @@ const Consultant = () => {
                             </div>
                         </section>
 
-                        {/* 3. Select Date */}
-                        <section className="flex flex-col gap-3 md:gap-5">
-                            <h2 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider ml-1">3. Select Date</h2>
-                            <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                {[
-                                    { id: 'today', label: 'Today', icon: 'today' },
-                                    { id: 'tomorrow', label: 'Tomorrow', icon: 'event' }
-                                ].map((option) => (
-                                    <label key={option.id} className="relative cursor-pointer group">
-                                        <input
-                                            className="peer sr-only"
-                                            name="session_date"
-                                            type="radio"
-                                            value={option.id}
-                                            checked={selectedDate === option.id}
-                                            onChange={() => setSelectedDate(option.id)}
-                                        />
-                                        <div className="py-3 px-3 md:py-4 md:px-4 rounded-xl border md:border-2 border-gray-100 bg-white hover:border-blue-600 hover:text-blue-600 peer-checked:border-blue-600 peer-checked:bg-blue-50/30 peer-checked:text-blue-600 peer-checked:shadow-sm peer-checked:scale-[1.02] flex items-center justify-center gap-2 md:gap-3 shadow-sm transition-all duration-200">
-                                            <span className={`material-symbols-outlined text-[18px] md:text-[22px] group-hover:text-blue-600 ${selectedDate === option.id ? 'text-blue-600' : 'text-gray-400'}`}>{option.icon}</span>
-                                            <span className={`text-xs md:text-sm font-semibold group-hover:text-blue-600 ${selectedDate === option.id ? 'text-blue-600' : 'text-gray-600'}`}>
-                                                {option.label}
-                                            </span>
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                        </section>
 
 
                         {/* CTA Section */}
