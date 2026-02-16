@@ -5,6 +5,7 @@ import PageHeader from '../components/PageHeader';
 import { postsData } from '../data/mockFeedData';
 import { useAuthAction } from '../hooks/useAuthAction';
 import { useAuth } from '../context/AuthContext';
+import { useSavedItems } from '../context/SavedItemsContext';
 import LoginModal from '../components/LoginModal';
 
 const Feed = () => {
@@ -12,6 +13,7 @@ const Feed = () => {
     // State for Filter Bar
     const [activeCountry, setActiveCountry] = useState('All Countries');
     const { user, requireAuth, setLoginModalOpen } = useAuth();
+    const { togglePost, isPostSaved } = useSavedItems();
     const [activeTopic, setActiveTopic] = useState('All Topics');
     const [sortBy, setSortBy] = useState('Newest');
 
@@ -72,10 +74,9 @@ const Feed = () => {
         });
     };
 
-    const handleSave = (postId) => {
+    const handleSave = (post) => {
         requireAuth(() => {
-            console.log('Saved post:', postId);
-            // Add save logic here
+            togglePost(post);
         });
     };
 
@@ -259,11 +260,13 @@ const Feed = () => {
                                         <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
                                             <div className="flex items-center gap-1">
                                                 <button
-                                                    onClick={() => handleSave(post.id)}
-                                                    className="p-1.5 md:p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                    title="Save"
+                                                    onClick={() => handleSave(post)}
+                                                    className={`p-1.5 md:p-2 rounded-lg transition-colors ${isPostSaved(post) ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'}`}
+                                                    title={isPostSaved(post) ? "Unsave" : "Save"}
                                                 >
-                                                    <span className="material-symbols-outlined text-[18px] md:text-[22px]">bookmark_border</span>
+                                                    <span className={`material-symbols-outlined text-[18px] md:text-[22px] ${isPostSaved(post) ? '!fill-current' : ''}`}>
+                                                        {isPostSaved(post) ? 'bookmark' : 'bookmark_border'}
+                                                    </span>
                                                 </button>
                                                 <button onClick={() => openShareModal(post.id)} className="p-1.5 md:p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Share">
                                                     <span className="material-symbols-outlined text-[18px] md:text-[22px]">share</span>

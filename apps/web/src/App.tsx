@@ -53,6 +53,7 @@ import Referrals from './pages/Referrals';
 import SavedColleges from './pages/SavedColleges';
 import SavedCourses from './pages/SavedCourses';
 import SavedAccommodations from './pages/SavedAccommodations';
+import SavedPosts from './pages/SavedPosts';
 import VisaPrep from './pages/VisaPrep';
 import LoanRequirements from './pages/LoanRequirements';
 import LoanEligibility from './pages/LoanEligibility';
@@ -154,6 +155,7 @@ function App() {
                                 <Route path="saved-colleges" element={<SavedColleges />} />
                                 <Route path="saved-courses" element={<SavedCourses />} />
                                 <Route path="saved-accommodations" element={<SavedAccommodations />} />
+                                <Route path="saved-posts" element={<SavedPosts />} />
                                 <Route path="profile/:username" element={<UserProfile />} />
                                 <Route path="institution/:name" element={<UniversityProfile />} />
                                 <Route path="consultant" element={<Consultant />} />

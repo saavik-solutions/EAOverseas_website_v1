@@ -67,9 +67,11 @@ interface SavedItemsContextType {
     toggleCollege: (college: College) => void;
     toggleCourse: (course: Course) => void;
     toggleAccommodation: (acc: Accommodation) => void;
+    togglePost: (post: SavedPost) => void;
     isCollegeSaved: (college: College) => boolean;
     isCourseSaved: (course: Course) => boolean;
     isAccommodationSaved: (acc: Accommodation) => boolean;
+    isPostSaved: (post: SavedPost) => boolean;
     savedAccommodations: Accommodation[];
     savedPosts: SavedPost[];
     myApplications: Application[];
@@ -174,6 +176,10 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return acc.id || acc.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     }
 
+    const getPostId = (post: SavedPost) => {
+        return post.id || post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    }
+
     const withdrawApplication = (id: number) => {
         setMyApplications(prev => prev.filter(app => app.id !== id));
     };
@@ -228,6 +234,17 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         });
     };
 
+    const togglePost = (post: SavedPost) => {
+        const id = getPostId(post);
+        setSavedPosts(prev => {
+            if (prev.find(p => getPostId(p) === id)) {
+                return prev.filter(p => getPostId(p) !== id);
+            } else {
+                return [...prev, { ...post, id }];
+            }
+        });
+    };
+
     const isCollegeSaved = (college: College) => {
         const id = getCollegeId(college);
         return savedColleges.some(c => getCollegeId(c) === id);
@@ -241,6 +258,11 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const isAccommodationSaved = (acc: Accommodation) => {
         const id = getAccommodationId(acc);
         return savedAccommodations.some(a => getAccommodationId(a) === id);
+    };
+
+    const isPostSaved = (post: SavedPost) => {
+        const id = getPostId(post);
+        return savedPosts.some(p => getPostId(p) === id);
     };
 
 
@@ -276,9 +298,11 @@ export const SavedItemsProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             toggleCollege,
             toggleCourse,
             toggleAccommodation,
+            togglePost,
             isCollegeSaved,
             isCourseSaved,
             isAccommodationSaved,
+            isPostSaved,
             savedAccommodations,
             savedPosts,
             myApplications,
