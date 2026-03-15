@@ -1,1174 +1,1067 @@
-import React, { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import PageHeader from '../components/PageHeader';
-import { useAuthAction } from '../hooks/useAuthAction';
-import { useAuth } from '../context/AuthContext';
-import LoginModal from '../components/LoginModal';
-import ShareModal from '../components/ShareModal';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import PageHeader from '@/components/layout/PageHeader';
+import { useAuthAction } from '@/shared/hooks/useAuthAction';
+import { useAuth } from '@/shared/contexts/AuthContext';
+import ShareModal from '@/features/shared-modals/ShareModal';
+import LoginModal from '@/features/auth/LoginModal';
+import { io, Socket } from 'socket.io-client';
+import ChatSidebar from '@/components/chat/ChatSidebar';
+import ChatWindow from '@/components/chat/ChatWindow';
+
+// --- Types ---
+interface Comment {
+    _id?: string;
+    author?: string;
+    avatar?: string;
+    text: string;
+    time?: string;
+    isEdited?: boolean;
+    replyTo?: string | null;
+}
+
+interface Post {
+    _id: string;
+    author?: string;
+    avatar?: string;
+    title: string;
+    content: string;
+    tags: string[];
+    category: string;
+    score: number;
+    hasLiked: boolean; // single-like per user session
+    commentsCount: number;
+    comments: Comment[];
+    time?: string;
+    tldrSummary?: string;
+}
+
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/feed`;
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// --- Translation Languages ---
+const SUPPORTED_LANGUAGES = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'te', name: 'Telugu' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+];
+
+const TRANSLATION_MIRRORS = [
+    "https://libretranslate.de/translate",
+    "https://translate.argosopentech.com/translate",
+    "https://translate.mentality.rip/translate",
+    "https://libretranslate.pussthecat.org/translate"
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const CommunityFeed = () => {
-    // State for interactive elements
+    console.log("CommunityFeed rendering...");
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-    const [shareData, setShareData] = useState(null);
-    const [expandedPosts, setExpandedPosts] = useState({});
-    const [visibleComments, setVisibleComments] = useState({});
+    const [shareData, setShareData] = useState<Post | null>(null);
     const [newPostText, setNewPostText] = useState('');
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [commentInputs, setCommentInputs] = useState({});
-    const [selectedFilter, setSelectedFilter] = useState('All Topics');
-    const [searchQuery, setSearchQuery] = useState(''); // Search State
-    const [visibleCommentCounts, setVisibleCommentCounts] = useState({}); // Manage visible count per post
+    const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
+    const [selectedFilter, setSelectedFilter] = useState('Algorithmic Feed');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [visibleComments, setVisibleComments] = useState<Record<string, boolean>>({});
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [trendingTopics, setTrendingTopics] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isPosting, setIsPosting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isSemanticSearching, setIsSemanticSearching] = useState(false);
+    // Inline comment edit state: { postId, idx, draft }
+    const [editingComment, setEditingComment] = useState<{ postId: string; idx: number; draft: string } | null>(null);
+    const [replyingTo, setReplyingTo] = useState<{ postId: string; commentId: string; authorName: string } | null>(null);
+    const [safetyViolation, setSafetyViolation] = useState<{ active: boolean; countdown: number; type: 'post' | 'comment'; postId?: string } | null>(null);
+    const [translations, setTranslations] = useState<Record<string, { title: string; content: string; lang: string; isLoading?: boolean }>>({});
 
-    const fileInputRef = useRef(null);
-    const currentUser = "Alex Morgan";
+    // ── Chat State ──────────────────────────────────────────────────────────
+    const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
+    const [activeChat, setActiveChat] = useState<{ conversationId: string; partnerName: string; partnerAvatar: string } | null>(null);
+    const [socketRef, setSocketRef] = useState<Socket | null>(null);
+    const [chatWidth, setChatWidth] = useState(380);
+    const chatWidthRef = useRef(380);
+
     const { executeAction, isLoginModalOpen, closeLoginModal } = useAuthAction();
-    const { user } = useAuth();
+    const { user, accessToken } = useAuth();
     const navigate = useNavigate();
 
+    // ── Socket.io Connection ────────────────────────────────────────────────
+    useEffect(() => {
+        const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+        setSocketRef(socket);
+        return () => { socket.disconnect(); };
+    }, []);
 
+    const handleChatResize = useCallback((delta: number) => {
+        const newWidth = Math.max(320, Math.min(600, chatWidthRef.current + delta));
+        chatWidthRef.current = newWidth;
+        setChatWidth(newWidth);
+    }, []);
+    const [searchParams] = useSearchParams();
+    const sharedPostId = searchParams.get('post');
+    const [highlightedPostId, setHighlightedPostId] = useState<string | null>(null);
 
-    // Mock data moved to initial state
-    const [posts, setPosts] = useState([
-        {
-            id: 101, // Special ID for the Quora-style question
-            type: 'question', // New type
-            author: "Anonymous", // Questions can be anon
-            avatar: "https://i.pravatar.cc/150?u=100", // Generic avatar for anon
-            time: "Sep 6",
-            title: "Which is the best university for interior design?",
-            content: "", // Questions usually have title as main content
-            tags: ["Interior Design", "University", "Study Abroad"],
-            category: "Admissions",
-            votes: 47, // Question follows
-            userVote: 0,
-            commentsCount: 13,
-            answers: [ // Rich answers structure
-                {
-                    author: "AI Assistant",
-                    bio: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Top institutes for interior design include NID, CEPT University, and others mentioned. It's crucial to check their specific entrance exams and curriculum focus.",
-                    time: "Just now",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Roshni Bhardwaj",
-                    bio: "Former INTERIOR DESIGNER",
-                    avatar: "https://i.pravatar.cc/150?u=101",
-                    text: "There are various colleges and institutes offering interior designing courses. Some of the known institutes are listed below - \n1. IIFD,Chandigarh \n2. MIT Institute of DESIGN \n3. National Institute of Design \n4. CEPT University \n5. JJ School of Arts...",
-                    time: "5y ago",
-                    upvotes: 15,
-                    isBestAnswer: true
-                },
-                {
-                    author: "Arshiya Singh",
-                    bio: "Software Engineer at Accenture (company) (2017–present)",
-                    avatar: "https://i.pravatar.cc/150?u=102",
-                    text: "If you are looking for industry-oriented academics, practical-based curriculum, professional corporate culture during college life itself, and better placement in any fortune company, then Lovely Professional University- LPU is totally worth it. The LPU Design programs are designed...",
-                    time: "4y ago",
-                    upvotes: 8
-                }
-            ],
-            comments: [] // Fallback/Standard comments
-        },
-        {
-            id: 2,
-            author: "Rohit_K",
-            avatar: "https://i.pravatar.cc/150?u=103",
-            time: "2h ago",
-            title: "Is the GRE waived for Fall 2024 computer science programs in Canada?",
-            content: "I'm seeing mixed information on university websites. Some say optional, some say required for international students. Has anyone applied recently to UofT or UBC?",
-            tags: ["Eligibility", "Canada"],
-            category: "Admissions",
-            votes: 156,
-            userVote: 0,
-            commentsCount: 13,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Regarding GRE waivers for CS in Canada (Fall 2024): Policies vary. UofT often waives it for MCS, while UBC recommends it. Always verify strictly on the official program website.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "David Kim",
-                    avatar: "https://i.pravatar.cc/150?u=104",
-                    text: "I applied to UofT last month. They didn't ask for GRE scores for the MCS program.",
-                    upvotes: 12,
-                    userVote: 0
-                },
-                {
-                    author: "Sarah Jenkins",
-                    avatar: "https://i.pravatar.cc/150?u=105",
-                    text: "UBC website says it's optional but 'recommended' for international applicants. I'd say take it if you can.",
-                    upvotes: 8,
-                    userVote: 0
-                },
-                {
-                    author: "Rahul Verma",
-                    avatar: "https://i.pravatar.cc/150?u=106",
-                    text: "Waterloo is strict about it for engineering but math seems flexible.",
-                    upvotes: 15,
-                    userVote: 0
-                },
-                {
-                    author: "Priya Sharma",
-                    avatar: "https://i.pravatar.cc/150?u=107",
-                    text: "I got a waiver from McGill based on my work experience. Worth asking!",
-                    upvotes: 22,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 3,
-            author: "Amit_Counselor",
-            avatar: "https://i.pravatar.cc/150?u=108",
-            isExpert: true,
-            time: "8h ago",
-            title: "Top 5 Scholarship Deadlines approaching in November",
-            tags: ["Scholarships", "Urgent"],
-            category: "Scholarships",
-            votes: 89,
-            userVote: 0,
-            commentsCount: 24,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "November is a critical month for scholarship deadlines. Ensure all documents, including recommendation letters, are ready well in advance for schemes like DAAD.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Kenji Sato",
-                    avatar: "https://i.pravatar.cc/150?u=109",
-                    text: "Thanks for the reminder! Almost missed the DAAD deadline.",
-                    upvotes: 15
-                },
-                {
-                    author: "Lisa Wong",
-                    avatar: "https://i.pravatar.cc/150?u=110",
-                    text: "Are these fully funded? Just checking.",
-                    upvotes: 8
-                }
-            ]
-        },
-        {
-            id: 4,
-            author: "Priya_Visa",
-            avatar: "https://i.pravatar.cc/150?u=111",
-            time: "1d ago",
-            title: "US F-1 Visa Interview Experience - Mumbai Consulate (Approved!)",
-            content: "Just got my visa approved! Here were the questions asked: 1. Why this university? 2. Who is sponsoring you? 3. What are your plans after graduation? Be confident and honest!",
-            tags: ["Visas", "USA"],
-            category: "Visas",
-            votes: 340,
-            userVote: 0,
-            commentsCount: 57,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Congratulations on the F-1 approval! Key takeaway: Be prepared for questions about university choice, sponsorship, and future plans. Confidence involves clear, honest answers.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Amit Patel",
-                    avatar: "https://i.pravatar.cc/150?u=112",
-                    text: "Congratulations! Did they ask for financial docs?",
-                    upvotes: 22
-                },
-                {
-                    author: "Neha Sharma",
-                    avatar: "https://i.pravatar.cc/150?u=113",
-                    text: "My interview is next week at the same consulate. Fingers crossed!",
-                    upvotes: 18
-                },
-                {
-                    author: "Rahul Verma",
-                    avatar: "https://i.pravatar.cc/150?u=106",
-                    text: "How long was the interview?",
-                    upvotes: 10
-                },
-                {
-                    author: "Priya_Visa",
-                    avatar: "https://i.pravatar.cc/150?u=111",
-                    text: "It was barely 2 minutes! Very quick.",
-                    upvotes: 45,
-                    isAuthor: true
-                },
-                {
-                    author: "Sneha Gupta",
-                    avatar: "https://i.pravatar.cc/150?u=114",
-                    text: "Did you need a consultancy or self-prep?",
-                    upvotes: 8
-                },
-                {
-                    author: "Mike Ross",
-                    avatar: "https://i.pravatar.cc/150?u=115",
-                    text: "Great tips! Confidence is definitely key.",
-                    upvotes: 14
-                },
-                {
-                    author: "Ananya Roy",
-                    avatar: "https://i.pravatar.cc/150?u=116",
-                    text: "I'm so nervous about mine. Any specific docs they checked?",
-                    upvotes: 6
-                },
-                {
-                    author: "Vikram Singh",
-                    avatar: "https://i.pravatar.cc/150?u=117",
-                    text: "Congrats! Party time! 🎉",
-                    upvotes: 30
-                }
-            ]
-        },
-        {
-            id: 5,
-            author: "Tech_Guru",
-            avatar: "https://i.pravatar.cc/150?u=118",
-            time: "2d ago",
-            title: "Finding off-campus accommodation in Berlin",
-            content: "WG-Gesucht is your best friend. Start looking at least 3 months in advance. Avoid transferring money before viewing the apartment/room.",
-            tags: ["Accommodation", "Germany"],
-            category: "Accommodation",
-            votes: 210,
-            userVote: 0,
-            commentsCount: 16,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Based on the question about finding accommodation in Berlin, I suggest checking platforms like WG-Gesucht and initializing your search at least 3 months early. Be cautious of scams demanding advanced payments.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Hans Mueller",
-                    avatar: "https://i.pravatar.cc/150?u=119",
-                    text: "Also check Kleinanzeigen, but be careful of scams.",
-                    upvotes: 12
-                },
-                {
-                    author: "Anna Schmidt",
-                    avatar: "https://i.pravatar.cc/150?u=120",
-                    text: "The housing crisis is real in Berlin. Good luck everyone!",
-                    upvotes: 9
-                },
-                {
-                    author: "Maria Schneider",
-                    avatar: "https://i.pravatar.cc/150?u=121",
-                    text: "I used Wunderflats for my first month. Expensive but easy.",
-                    upvotes: 7,
-                    userVote: 0
-                },
-                {
-                    author: "Tom Wilson",
-                    avatar: "https://i.pravatar.cc/150?u=122",
-                    text: "Studentendorf Schlachtensee usually has spots if you apply early.",
-                    upvotes: 11,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 6,
-            author: "Career_Coach",
-            avatar: "https://i.pravatar.cc/150?u=123",
-            isExpert: true,
-            time: "3d ago",
-            title: "Networking tips for international students in the US",
-            content: "Don't just stick to your coursework. Attend career fairs, join student clubs, and reach out to alumni on LinkedIn. Networking is key to landing internships.",
-            tags: ["Career Advice", "USA"],
-            category: "Career Advice",
-            votes: 450,
-            userVote: 0,
-            commentsCount: 31,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Networking in the US is vital. This post highlights leveraging career fairs, student clubs, and alumni networks. Starting early and being proactive is key to securing internships.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "David Lee",
-                    avatar: "https://i.pravatar.cc/150?u=124",
-                    text: "This is crucial! My referral came from a senior I met at a club event.",
-                    upvotes: 40
-                },
-                {
-                    author: "Wei Chen",
-                    avatar: "https://i.pravatar.cc/150?u=125",
-                    text: "Any tips for introverts who find networking difficult?",
-                    upvotes: 25
-                },
-                {
-                    author: "Sarah Jones",
-                    avatar: "https://i.pravatar.cc/150?u=126",
-                    text: "Start small! Ask questions in class. Join one club that interests you.",
-                    upvotes: 15
-                },
-                {
-                    author: "Ahmed Khan",
-                    avatar: "https://i.pravatar.cc/150?u=127",
-                    text: "LinkedIn is powerful properly used. Don't just connect, send a note.",
-                    upvotes: 20
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "University career centers are underrated. Use them!",
-                    upvotes: 12
-                }
-            ]
-        },
-        {
-            id: 7,
-            author: "Rohan_M",
-            avatar: "https://i.pravatar.cc/150?u=129",
-            time: "4h ago",
-            title: "Anyone starting at TU Delft this September?",
-            content: "Looking for potential roommates and study buddies for the MSc in Aerospace Engineering program.",
-            tags: ["Routine", "Netherlands"],
-            category: "Routine",
-            votes: 45,
-            userVote: 0,
-            commentsCount: 9,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "For new TU Delft students, connecting with peers in the same program is a great start. This thread facilitates finding roommates and study partners for the Aerospace Engineering cohort.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Pieter Jansen",
-                    avatar: "https://i.pravatar.cc/150?u=130",
-                    text: "Hey! I'm starting in CS. Let's connect.",
-                    upvotes: 5,
-                    userVote: 0
-                },
-                {
-                    author: "Sven Berg",
-                    avatar: "https://i.pravatar.cc/150?u=131",
-                    text: "Welcome to Delft! You'll love it here.",
-                    upvotes: 7,
-                    userVote: 0
-                },
-                {
-                    author: "Anja Weber",
-                    avatar: "https://i.pravatar.cc/150?u=132",
-                    text: "Have you found a room yet? It's quite tough currently.",
-                    upvotes: 12,
-                    userVote: 0
-                },
-                {
-                    author: "Rahul M",
-                    avatar: "https://i.pravatar.cc/150?u=133",
-                    text: "I've applied for the same program! Waiting for decision.",
-                    upvotes: 3,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 8,
-            author: "Sneha_S",
-            avatar: "https://i.pravatar.cc/150?u=134",
-            time: "6h ago",
-            title: "Confused between IELTS and TOEFL for UK universities",
-            content: "Most unis accept both, but is one preferred over the other? Also, heard TOEFL is harder?",
-            tags: ["Admissions", "UK"],
-            category: "Admissions",
-            votes: 78,
-            userVote: 0,
-            commentsCount: 21,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Regarding IELTS vs TOEFL for UK universities: Both are widely accepted. IELTS is often preferred for UK visas (UKVI), while TOEFL offers a computer-based alternative. Check specific institution requirements.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Ravi Kumar",
-                    avatar: "https://i.pravatar.cc/150?u=135",
-                    text: "IELTS is definitely the safer bet for UK. Almost all unis accept it without issues.",
-                    upvotes: 45
-                },
-                {
-                    author: "Jessica Li",
-                    avatar: "https://i.pravatar.cc/150?u=136",
-                    text: "TOEFL isn't 'harder', just different format. If you're comfortable with computer-based tests, it might be easier for you.",
-                    upvotes: 12
-                },
-                {
-                    author: "Ahmed Khan",
-                    avatar: "https://i.pravatar.cc/150?u=127",
-                    text: "Check your visa requirements too! UKVI has specific rules for some visas.",
-                    upvotes: 28
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "Does Oxford generally prefer one?",
-                    upvotes: 5,
-                    userVote: 0
-                },
-                {
-                    author: "Tom Wilson",
-                    avatar: "https://i.pravatar.cc/150?u=122",
-                    text: "Oxford accepts both but checks minimum band scores carefully.",
-                    upvotes: 9,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 9,
-            author: "Scholarship_Seeker",
-            avatar: "https://i.pravatar.cc/150?u=137",
-            time: "12h ago",
-            title: "Full-ride scholarships for Masters in Australia?",
-            content: "Are there any fully funded scholarships for international students in Australia besides the Australia Awards?",
-            tags: ["Scholarships", "Australia"],
-            category: "Scholarships",
-            votes: 110,
-            userVote: 0,
-            commentsCount: 19,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Fully funded scholarships in Australia include 'Australia Awards' and university-specific schemes like the Vice-Chancellor's Scholarship at USyd. The Research Training Program (RTP) is excellent for research candidates.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "Australia Awards is the big one, but check individual university websites. Monash and Melbourne U have their own generous scholarships.",
-                    upvotes: 33
-                },
-                {
-                    author: "Tom Wilson",
-                    avatar: "https://i.pravatar.cc/150?u=122",
-                    text: "Also look at RTP (Research Training Program) if you're doing a research masters. Fully funded!",
-                    upvotes: 19
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "You can find scholarships on ScholarshipPortal too.",
-                    upvotes: 6,
-                    userVote: 0
-                },
-                {
-                    author: "David Lee",
-                    avatar: "https://i.pravatar.cc/150?u=124",
-                    text: "University of Sydney has a Vice-Chancellor's Scholarship explicitly for international students.",
-                    upvotes: 21,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 10,
-            author: "Travel_Bug",
-            avatar: "https://i.pravatar.cc/150?u=138",
-            time: "1d ago",
-            title: "Packing list for winter in Canada",
-            content: "Moveing from a warm country to Toronto. What are the absolute essentials I should pack vs buy there?",
-            tags: ["Routine", "Canada"],
-            category: "Routine",
-            votes: 190,
-            userVote: 0,
-            commentsCount: 41,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "For winter packing in Canada: Prioritize thermal layers and waterproof boots. It's often recommended to purchase heavy coats locally in Canada to ensure they meet the -20C rating.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Sarah Jenkins",
-                    avatar: "https://i.pravatar.cc/150?u=105",
-                    text: "Buy your heavy winter coat IN Canada. The ones you get in warm countries aren't rated for -20C.",
-                    upvotes: 89
-                },
-                {
-                    author: "Ali Hassan",
-                    avatar: "https://i.pravatar.cc/150?u=139",
-                    text: "Thermals are a must! Pack lots of layers. And good waterproof boots.",
-                    upvotes: 45
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "Don't forget power adapters! Canada uses different plugs.",
-                    upvotes: 15,
-                    userVote: 0
-                },
-                {
-                    author: "Tom Wilson",
-                    avatar: "https://i.pravatar.cc/150?u=122",
-                    text: "Bring your favorite spices. It takes time to find good ethnic grocery stores.",
-                    upvotes: 30,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 11,
-            author: "Visa_Expert",
-            avatar: "https://i.pravatar.cc/150?u=140",
-            isExpert: true,
-            time: "2d ago",
-            title: "Shenghen Visa delays for Indian students in Germany",
-            content: "Current processing times are longer than usual. Apply at least 3 months in advance if you plan to travel within EU.",
-            tags: ["Visas", "Germany"],
-            category: "Visas",
-            votes: 300,
-            userVote: 0,
-            commentsCount: 26,
-            comments: [
-                {
-                    author: "AI Assistant",
-                    avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AIAssistant",
-                    text: "Schengen Visa processing for Indian students in Germany is currently delayed. The recommended action is to apply at least 3 months in advance of planned travel.",
-                    upvotes: 0,
-                    userVote: 0
-                },
-                {
-                    author: "Raj Patel",
-                    avatar: "https://i.pravatar.cc/150?u=141",
-                    text: "Got my appointment after 4 months! This is crazy.",
-                    upvotes: 56
-                },
-                {
-                    author: "Klaus Weber",
-                    avatar: "https://i.pravatar.cc/150?u=142",
-                    text: "Try applying from a different consulate if possible. Sometimes smaller cities are faster.",
-                    upvotes: 21
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "Bangalore consulate has fewer slots than Mumbai currently.",
-                    upvotes: 11,
-                    userVote: 0
-                },
-                {
-                    author: "Tom Wilson",
-                    avatar: "https://i.pravatar.cc/150?u=122",
-                    text: "Apply early! Processing can take up to 15 days.",
-                    upvotes: 18,
-                    userVote: 0
-                }
-            ]
-        },
-        {
-            id: 12,
-            author: "Job_Hunter",
-            avatar: "https://i.pravatar.cc/150?u=143",
-            time: "3d ago",
-            title: "Post-Study Work Visa (PSW) rules changes in UK 2024",
-            content: "Breaking down the recent changes to the Graduate Route visa. What you need to know.",
-            tags: ["Career Advice", "UK"],
-            category: "Career Advice",
-            votes: 500,
-            commentsCount: 60,
-            comments: [
-                {
-                    author: "Emily Clark",
-                    avatar: "https://i.pravatar.cc/150?u=144",
-                    text: "So relieved they kept the 2-year duration! Was worried they'd cut it.",
-                    upvotes: 120
-                },
-                {
-                    author: "Priya Sharma",
-                    avatar: "https://i.pravatar.cc/150?u=107",
-                    text: "Does this affect dependents? I heard mixed news about bringing family.",
-                    upvotes: 45
-                },
-                {
-                    author: "Maria Garcia",
-                    avatar: "https://i.pravatar.cc/150?u=128",
-                    text: "You can convert to skilled worker visa if you find a sponsor.",
-                    upvotes: 15,
-                    userVote: 0
-                },
-                {
-                    author: "Tom Wilson",
-                    avatar: "https://i.pravatar.cc/150?u=122",
-                    text: "Remember, the minimum salary threshold has increased for skilled worker visas.",
-                    upvotes: 35,
-                    userVote: 0
-                }
-            ]
-        }
-    ]);
+    const [debouncedSearch, setDebouncedSearch] = useState('');
 
-    const openShareModal = (post) => {
-        executeAction(() => {
-            setShareData(post);
-            setIsShareModalOpen(true);
-        });
-    };
+    // Debounce search to avoid spamming the backend
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
 
-    const toggleComments = (postId) => {
-        setVisibleComments(prev => {
-            const isVisible = !!prev[postId];
-            if (isVisible) {
-                // Reset count when closing so next open shows default 3
-                setVisibleCommentCounts(curr => ({ ...curr, [postId]: 3 }));
-            }
-            return { ...prev, [postId]: !prev[postId] };
-        });
-    };
+    // ── Backend fetch (falls back to seed data gracefully) ──────────────────
+    useEffect(() => {
+        const fetchFeed = async () => {
+            setIsLoading(true);
+            try {
+                const topicParam = selectedFilter !== 'Algorithmic Feed' ? `topic=${encodeURIComponent(selectedFilter)}&` : '';
+                const searchParam = debouncedSearch ? `search=${encodeURIComponent(debouncedSearch)}&` : '';
+                const uId = (user as any)?.id || (user as any)?._id || (user as any)?.uid;
+                const userParam = uId ? `userId=${uId}` : '';
+                const queryStr = `?${topicParam}${searchParam}${userParam}`;
 
-    const toggleReadMore = (postId) => {
-        setExpandedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
-    };
-
-    const loadMoreComments = (postId) => {
-        setVisibleCommentCounts(prev => ({
-            ...prev,
-            [postId]: (prev[postId] || 3) + 3 // Load 3 more comments at a time
-        }));
-    };
-
-    const handleCommentVote = (postId, commentIdx, direction) => {
-        executeAction(() => {
-            setPosts(prevPosts => prevPosts.map(post => {
-                if (post.id === postId) {
-                    const newComments = [...post.comments];
-                    const comment = newComments[commentIdx];
-                    const currentVote = comment.userVote || 0;
-                    let newVote = 0;
-                    let voteChange = 0;
-
-                    if (direction === 'up') {
-                        if (currentVote === 1) {
-                            // Toggle off
-                            newVote = 0;
-                            voteChange = -1;
-                        } else {
-                            // Vote up (from 0 or -1)
-                            newVote = 1;
-                            voteChange = currentVote === -1 ? 2 : 1;
-                        }
-                    } else {
-                        if (currentVote === -1) {
-                            // Toggle off
-                            newVote = 0;
-                            voteChange = 1; // logical adjustment if we were tracking 'score'
-                        } else {
-                            // Vote down
-                            newVote = -1;
-                            voteChange = currentVote === 1 ? -2 : -1;
-                        }
+                const res = await fetch(`${API_URL}${queryStr}`, {
+                    headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.posts?.length > 0) {
+                        const hydrated: Post[] = data.posts.map((p: any) => ({
+                            _id: p._id,
+                            author: p.authorId?.name || 'Unknown',
+                            authorUsername: p.authorId?.email?.split('@')[0] || p.authorId?.name?.toLowerCase().replace(/\s+/g, '_') || 'unknown',
+                            avatar: p.authorId?.avatarUrl || `https://i.pravatar.cc/150?u=${p._id}`,
+                            title: p.title,
+                            content: p.content,
+                            tags: p.tags || [],
+                            category: p.tags?.[0] || 'General',
+                            score: p.score || 0,
+                            hasLiked: p.hasLiked || false,
+                            commentsCount: p.commentsCount || 0,
+                            comments: p.comments || [],
+                            time: new Date(p.createdAt).toLocaleDateString(),
+                            tldrSummary: p.tldrSummary,
+                        }));
+                        setPosts(hydrated);
                     }
+                }
+            } catch (_) { /* keep seed data */ }
+            finally { setIsLoading(false); }
+        };
 
-                    newComments[commentIdx] = {
-                        ...comment,
-                        upvotes: (comment.upvotes || 0) + voteChange,
-                        userVote: newVote
+        const fetchTrending = async () => {
+            try {
+                const res = await fetch(`${API_URL}/trending`, {
+                    headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.trending?.length > 0) setTrendingTopics(data.trending);
+                }
+            } catch (_) { }
+        };
+
+        fetchFeed();
+        fetchTrending();
+    }, [selectedFilter, debouncedSearch]);
+
+    // ── Safety Violation Countdown ──────────────────────────────────────────
+    useEffect(() => {
+        if (safetyViolation?.active && safetyViolation.countdown > 0) {
+            const timer = setTimeout(() => {
+                setSafetyViolation(prev => prev ? { ...prev, countdown: prev.countdown - 1 } : null);
+            }, 1000);
+            return () => clearTimeout(timer);
+        } else if (safetyViolation?.active && safetyViolation.countdown === 0) {
+            const timer = setTimeout(() => {
+                if (safetyViolation.type === 'post') setNewPostText('');
+                if (safetyViolation.type === 'comment' && safetyViolation.postId) {
+                    setCommentInputs(prev => ({ ...prev, [safetyViolation.postId!]: '' }));
+                }
+                setSafetyViolation(null);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [safetyViolation]);
+
+    // ── Deep linking (auto-scroll + highlight) ───────────────────────────────
+    useEffect(() => {
+        if (sharedPostId && posts.length > 0) {
+            const timer = setTimeout(() => {
+                const element = document.getElementById(`post-${sharedPostId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setHighlightedPostId(sharedPostId);
+                    // Remove highlight after 4 seconds
+                    setTimeout(() => setHighlightedPostId(null), 4000);
+                }
+            }, 800); // Delay for data render
+            return () => clearTimeout(timer);
+        }
+    }, [sharedPostId, posts]);
+
+    // ── Handle Auto-Chat Trigger ──────────────────────────────────────────
+    useEffect(() => {
+        const chatWith = searchParams.get('chatWith');
+        if (chatWith && user) {
+            setChatSidebarOpen(true);
+            // The sidebar will handle loading conversations. 
+        }
+    }, [searchParams, user]);
+
+    // ── Filtered posts (search + category filter) ────────────────────────────
+    const filteredPosts = posts.filter(post => {
+        const matchFilter = selectedFilter === 'Algorithmic Feed'
+            || post.category === selectedFilter
+            || post.tags.includes(selectedFilter);
+
+        const q = searchQuery.toLowerCase().trim();
+        const matchSearch = !q
+            || post.title.toLowerCase().includes(q)
+            || post.content.toLowerCase().includes(q)
+            || post.tags.some(t => t.toLowerCase().includes(q))
+            || (post.author || '').toLowerCase().includes(q);
+
+        return matchFilter && matchSearch;
+    });
+
+    // ── Semantic search animation ────────────────────────────────────────────
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        if (e.target.value.length > 3) {
+            setIsSemanticSearching(true);
+            setTimeout(() => setIsSemanticSearching(false), 600);
+        }
+    };
+
+    // ── Single-like toggle ───────────────────────────────────────────────────
+    const handleLike = (postId: string) => {
+        executeAction(async () => {
+            const uId = user?.firebaseUid || (user as any)?.id || (user as any)?._id || (user as any)?.uid || 'Guest';
+            console.log("Liking post", postId, "as user", uId);
+            if (!uId) {
+                setError("Account identification error. Please try logging out and back in.");
+                return;
+            }
+
+            let isLiking = false;
+            // Optimistic update
+            setPosts(prev => prev.map(p => {
+                if (p._id !== postId) return p;
+                isLiking = !p.hasLiked;
+                return { ...p, hasLiked: isLiking, score: p.score + (isLiking ? 1 : -1) };
+            }));
+
+            try {
+                const res = await fetch(`${API_URL}/${postId}/toggle-like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ userId: uId })
+                });
+                if (!res.ok) {
+                    // Revert on fail
+                    setPosts(prev => prev.map(p => {
+                        if (p._id !== postId) return p;
+                        return { ...p, hasLiked: !isLiking, score: p.score + (!isLiking ? 1 : -1) };
+                    }));
+                }
+            } catch (err) {
+                // Revert on fail
+                setPosts(prev => prev.map(p => {
+                    if (p._id !== postId) return p;
+                    return { ...p, hasLiked: !isLiking, score: p.score + (!isLiking ? 1 : -1) };
+                }));
+            }
+        });
+    };
+
+    // ── Toggle comment section ───────────────────────────────────────────────
+    const toggleComments = (postId: string) => {
+        setVisibleComments(prev => ({ ...prev, [postId]: !prev[postId] }));
+    };
+
+    // ── Submit comment ───────────────────────────────────────────────────────
+    const handleCommentSubmit = (postId: string) => {
+        const text = commentInputs[postId]?.trim();
+        if (!text) return;
+
+        executeAction(async () => {
+            try {
+                const uId = user?.firebaseUid || (user as any)?.id || (user as any)?._id || (user as any)?.uid || 'Guest';
+                console.log("Commenting on post", postId, "as user", uId);
+                if (!uId) {
+                    setError("Account identification error. Please try logging out and back in.");
+                    return;
+                }
+
+                const res = await fetch(`${API_URL}/${postId}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        authorId: uId,
+                        text,
+                        parentId: replyingTo?.postId === postId ? replyingTo.commentId : null
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const newComment: Comment = {
+                        _id: data.comment._id,
+                        author: user?.name || user?.displayName || 'Guest',
+                        avatar: user?.avatarUrl || user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
+                        text,
+                        time: 'Just now',
+                        replyTo: replyingTo?.postId === postId ? replyingTo.commentId : null
                     };
-                    return { ...post, comments: newComments };
-                }
-                return post;
-            }));
-        });
-    };
-
-
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setSelectedImage(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const removeImage = () => {
-        setSelectedImage(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    };
-
-    const handlePostSubmit = () => {
-        executeAction(() => {
-            if (!newPostText.trim()) return;
-
-            const newPost = {
-                id: Date.now(),
-                author: currentUser,
-                avatar: "https://i.pravatar.cc/150?u=145", // Using default avatar
-                time: "Just now",
-                title: newPostText, // Using text as title for simplicity in this quick post
-                content: "",
-                image: selectedImage, // Attach selected image
-                tags: ["General"],
-                category: "Routine",
-                votes: 0,
-                commentsCount: 0,
-                comments: []
-            };
-
-            setPosts([newPost, ...posts]);
-            setNewPostText('');
-            removeImage(); // Clear image after posting
-        });
-    };
-
-    const handleDeletePost = (postId) => {
-        setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-    };
-
-    const handleVote = (postId, direction) => {
-        executeAction(() => {
-            setPosts(prevPosts => prevPosts.map(post => {
-                if (post.id === postId) {
-                    let newVoteCount = post.votes;
-                    let newUserVote = post.userVote || 0; // Default to 0 if undefined
-
-                    if (direction === 'up') {
-                        if (newUserVote === 1) {
-                            // Already upvoted, remove vote
-                            newUserVote = 0;
-                            newVoteCount--;
-                        } else if (newUserVote === -1) {
-                            // Was downvoted, switch to upvote
-                            newUserVote = 1;
-                            newVoteCount += 2;
-                        } else {
-                            // No vote, add upvote
-                            newUserVote = 1;
-                            newVoteCount++;
-                        }
-                    } else { // direction === 'down'
-                        if (newUserVote === -1) {
-                            // Already downvoted, remove vote
-                            newUserVote = 0;
-                            newVoteCount++; // Restore count
-                        } else if (newUserVote === 1) {
-                            // Was upvoted, switch to downvote
-                            newUserVote = -1;
-                            newVoteCount -= 2;
-                        } else {
-                            // No vote, add downvote
-                            newUserVote = -1;
-                            newVoteCount--;
-                        }
-                    }
-                    return { ...post, votes: newVoteCount, userVote: newUserVote };
-                }
-                return post;
-            }));
-        });
-    };
-
-    const handleCommentChange = (postId, text) => {
-        setCommentInputs(prev => ({ ...prev, [postId]: text }));
-    };
-
-    const handleCommentSubmit = (postId) => {
-        const text = commentInputs[postId];
-        if (!text || !text.trim()) return;
-
-        setPosts(prevPosts => prevPosts.map(post => {
-            if (post.id === postId) {
-                const newComment = {
-                    author: currentUser,
-                    avatar: "https://i.pravatar.cc/150?u=145",
-                    text: text,
-                    time: "Just now",
-                    upvotes: 0,
-                    userVote: 0
-                };
-                let updatedComments = [...post.comments];
-                const hasAIComment = updatedComments.length > 0 && updatedComments[0].author === 'AI Assistant';
-
-                if (hasAIComment) {
-                    updatedComments.splice(1, 0, newComment);
+                    setReplyingTo(null);
+                    setPosts(prev => prev.map(p => {
+                        if (p._id !== postId) return p;
+                        return {
+                            ...p,
+                            commentsCount: p.commentsCount + 1,
+                            comments: [newComment, ...p.comments],
+                        };
+                    }));
+                    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+                    setError(null);
                 } else {
-                    updatedComments.unshift(newComment);
+                    const errData = await res.json();
+                    if (res.status === 403 && errData.code === 'SAFETY_VIOLATION') {
+                        setSafetyViolation({ active: true, countdown: 5, type: 'comment', postId });
+                        setError(null);
+                    } else {
+                        setError(errData.error || 'Failed to add comment');
+                    }
                 }
-
-                return {
-                    ...post,
-                    commentsCount: post.commentsCount + 1,
-                    comments: updatedComments
-                };
+            } catch (err) {
+                console.error("Failed to comment", err);
+                setError('Connection failed. Is the server running?');
             }
-            return post;
-        }));
-
-        setCommentInputs(prev => ({ ...prev, [postId]: '' }));
-
-        // Ensure the new comment is visible by expanding the count
-        setVisibleCommentCounts(prev => ({
-            ...prev,
-            [postId]: (prev[postId] || 3) + 1
-        }));
+        });
     };
 
-    return (
-        <div className="flex flex-col flex-1 h-full overflow-hidden">
-            <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
-            <div className="hidden lg:block">
-                <PageHeader
-                    title="Community Feed"
-                    actions={
-                        !user ? (
-                            <button
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm hidden lg:block"
-                                onClick={() => navigate('/landing')}
-                            >
-                                Enter Website
-                            </button>
-                        ) : null
+    // ── Create post ──────────────────────────────────────────────────────────
+    const handlePostSubmit = () => {
+        executeAction(async () => {
+            const uId = user?.firebaseUid || (user as any)?.id || (user as any)?._id || (user as any)?.uid || 'Guest';
+            console.log("Creating new post with uId:", uId);
+            if (!uId) {
+                setError("Account identification error. Please try logging out and back in.");
+                return;
+            }
+
+            if (!newPostText.trim()) return;
+            const content = newPostText.trim();
+            const autoTags = content.toLowerCase().includes('visa')
+                ? ['Visas']
+                : content.toLowerCase().includes('scholarship')
+                    ? ['Scholarships']
+                    : ['General', 'Discussion'];
+
+            const tempId = `temp-${Date.now()}`;
+            const optimisticPost: Post = {
+                _id: tempId,
+                author: user?.name || user?.displayName || 'Guest',
+                avatar: user?.avatarUrl || user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
+                title: content,
+                content: content,
+                tags: autoTags,
+                category: autoTags[0],
+                score: 1,
+                hasLiked: false,
+                commentsCount: 0,
+                comments: [],
+                time: 'Just now',
+            };
+
+            // Instant Post (Optimistic Update)
+            setPosts(prev => [optimisticPost, ...prev]);
+            setNewPostText('');
+            setIsPosting(true);
+            setError(null);
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        authorId: uId,
+                        title: content,
+                        content: content,
+                        tags: autoTags
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    // Update the temp post with the real one from backend
+                    setPosts(prev => prev.map(p => p._id === tempId ? {
+                        ...p,
+                        _id: data.post._id,
+                        time: new Date(data.post.createdAt).toLocaleDateString()
+                    } : p));
+                } else {
+                    // Revert on fail
+                    setPosts(prev => prev.filter(p => p._id !== tempId));
+                    setNewPostText(content); // Restore text
+
+                    let errorMessage = `Failed to create post (${res.status})`;
+                    try {
+                        const errData = await res.json();
+                        if (res.status === 403 && errData.code === 'SAFETY_VIOLATION') {
+                            setSafetyViolation({ active: true, countdown: 5, type: 'post' });
+                            return;
+                        }
+                        errorMessage = errData.error || errData.details || errorMessage;
+                    } catch (e) {
+                        const text = await res.text();
+                        errorMessage += `: ${text.substring(0, 50)}`;
                     }
-                />
+                    setError(errorMessage);
+                }
+            } catch (err: any) {
+                console.error("Failed to post", err);
+                setPosts(prev => prev.filter(p => p._id !== tempId)); // Revert
+                setNewPostText(content); // Restore text
+                setError(`Connection failed: ${err.message || 'Is the server running?'}`);
+            } finally {
+                setIsPosting(false);
+            }
+        });
+    };
+
+    // ── Post Translation (Integrated High-Reliability) ──────────────────────────
+    const handleTranslate = async (postId: string, title: string, content: string, targetLang: string) => {
+        if (targetLang === 'en') {
+            setTranslations(prev => {
+                const next = { ...prev };
+                delete next[postId];
+                return next;
+            });
+            return;
+        }
+
+        setTranslations(prev => ({
+            ...prev,
+            [postId]: { ...prev[postId], isLoading: true, lang: targetLang, title, content }
+        }));
+
+        let success = false;
+
+        // 1. Primary: High-reliability Backend (via OpenAI)
+        try {
+            const res = await fetch(`${API_URL}/translate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texts: [title, content], targetLang })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const translatedText = data.translatedText;
+                setTranslations(prev => ({
+                    ...prev,
+                    [postId]: {
+                        title: translatedText[0] || title,
+                        content: translatedText[1] || content,
+                        lang: targetLang,
+                        isLoading: false
+                    }
+                }));
+                success = true;
+            }
+        } catch (err) {
+            console.warn("Backend translation failed, trying mirrors...");
+        }
+
+        // 2. Fallback: Open Source Mirrors
+        if (!success) {
+            for (const mirror of TRANSLATION_MIRRORS) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                    const res = await fetch(mirror, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            q: [title, content],
+                            source: "auto",
+                            target: targetLang,
+                            format: "text"
+                        }),
+                        headers: { "Content-Type": "application/json" },
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        const translatedText = data.translatedText;
+
+                        setTranslations(prev => ({
+                            ...prev,
+                            [postId]: {
+                                title: Array.isArray(translatedText) ? translatedText[0] : (title),
+                                content: Array.isArray(translatedText) ? translatedText[1] : (translatedText || content),
+                                lang: targetLang,
+                                isLoading: false
+                            }
+                        }));
+                        success = true;
+                        break;
+                    }
+                } catch (err) {
+                    console.warn(`Mirror ${mirror} failed...`);
+                }
+            }
+        }
+
+        if (!success) {
+            setTranslations(prev => ({
+                ...prev,
+                [postId]: { ...prev[postId], isLoading: false }
+            }));
+            // Provide a slightly more descriptive error
+            const detail = error ? `: ${error}` : "";
+            setError(`Translation service unavailable${detail}. Using your OpenAI key in the backend should prevent this; please check API logs.`);
+        }
+    };
+
+    // ── Save edited comment ───────────────────────────────────────────────────
+    const handleCommentSave = async (postId: string, idx: number) => {
+        if (!editingComment || !editingComment.draft.trim()) return;
+
+        const post = posts.find(p => p._id === postId);
+        const commentToEdit = post?.comments[idx];
+
+        // MVP: If it's a seed comment without a valid DB _id, allow local update anyway.
+        // In real use, only DB comments will be editable.
+        if (commentToEdit && commentToEdit._id && !commentToEdit._id.startsWith('seed')) {
+            try {
+                const uId = (user as any)?.id || (user as any)?._id || (user as any)?.uid;
+                await fetch(`${API_URL}/comment/${commentToEdit._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        text: editingComment.draft.trim(),
+                        userId: uId
+                    })
+                });
+            } catch (err) {
+                console.error("Failed to update comment in DB", err);
+            }
+        }
+
+        setPosts(prev => prev.map(p => {
+            if (p._id !== postId) return p;
+            const updated = p.comments.map((c, i) =>
+                i === idx ? { ...c, text: editingComment.draft.trim(), isEdited: true } : c
+            );
+            return { ...p, comments: updated };
+        }));
+        setEditingComment(null);
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────
+    return (
+        <div className="flex flex-col flex-1 h-full overflow-hidden bg-slate-50 font-['Inter']">
+            <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+
+            <div className="hidden lg:block">
+                <PageHeader title="Community Intelligence Feed" />
             </div>
+
             <div className="flex flex-1 overflow-hidden">
-                {/* CENTER COLUMN: Main Feed */}
-                <main className="flex-1 flex flex-col h-full overflow-hidden bg-gray-50 relative">
+                {/* ── CHAT SIDEBAR (Left) ──────────────────────────── */}
+                <ChatSidebar
+                    currentUserId={user?.uid || ''}
+                    currentUserName={user?.displayName || 'Guest'}
+                    isOpen={chatSidebarOpen}
+                    onClose={() => setChatSidebarOpen(false)}
+                    activeConversationId={activeChat?.conversationId}
+                    socket={socketRef}
+                    onSelectConversation={(conv, partner) => {
+                        setActiveChat({
+                            conversationId: conv._id,
+                            partnerName: partner.name,
+                            partnerAvatar: partner.avatarUrl || `https://i.pravatar.cc/150?u=${partner._id}`,
+                        });
+                        // On mobile, close sidebar when chat is selected
+                        if (window.innerWidth < 1024) setChatSidebarOpen(false);
+                    }}
+                />
+
+                {/* Overlay for mobile sidebar */}
+                {chatSidebarOpen && (
+                    <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setChatSidebarOpen(false)} />
+                )}
+
+                {/* ── MAIN FEED ──────────────────────────────────────── */}
+                <main className="flex-1 flex flex-col h-full overflow-hidden relative">
 
                     {/* Sticky Search Bar */}
-                    <div className="bg-white border-b border-gray-200 px-6 py-3 z-20 sticky top-0">
-                        <div className="max-w-3xl mx-auto relative">
-                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                            <input
-                                className="w-full h-10 pl-10 pr-4 rounded-full bg-gray-100 border-none outline-none text-sm placeholder:text-gray-500 focus:bg-white focus:ring-1 focus:ring-blue-200 focus:shadow-sm transition-all font-medium"
-                                placeholder="Search for questions, universities, or topics..."
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
+                    <div className="bg-white border-b border-slate-200 px-6 py-4 z-20 sticky top-0 shadow-sm">
+                        <div className="max-w-3xl mx-auto flex items-center gap-3">
+                            {/* Chat Toggle Button */}
+                            <button
+                                onClick={() => setChatSidebarOpen(prev => !prev)}
+                                className={`shrink-0 size-10 rounded-xl flex items-center justify-center transition-all shadow-sm ${chatSidebarOpen
+                                    ? 'bg-indigo-600 text-white shadow-indigo-200'
+                                    : 'bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200'
+                                    }`}
+                                title="Toggle Chat"
+                            >
+                                <span className="material-symbols-outlined text-xl">chat</span>
+                            </button>
+                            <div className="flex-1 relative group">
+                                <span className={`material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[20px] transition-colors ${isSemanticSearching ? 'text-indigo-500' : 'text-slate-400 group-focus-within:text-indigo-500'}`}>
+                                    search
+                                </span>
+                                <input
+                                    className="w-full h-11 pl-11 pr-24 rounded-xl bg-slate-100 border border-transparent outline-none text-sm placeholder:text-slate-500 focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-50 transition-all"
+                                    placeholder="Search posts, topics or questions..."
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">close</span>
+                                    </button>
+                                )}
+                                {isSemanticSearching && (
+                                    <span className="absolute right-10 top-1/2 -translate-y-1/2 text-[10px] text-indigo-500 font-bold animate-pulse tracking-wide">
+                                        NLP…
+                                    </span>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Search result count */}
+                        {searchQuery.trim() && (
+                            <p className="max-w-3xl mx-auto mt-2 text-xs text-slate-400 font-medium">
+                                {filteredPosts.length === 0
+                                    ? `No results for "${searchQuery}"`
+                                    : `${filteredPosts.length} result${filteredPosts.length > 1 ? 's' : ''} for "${searchQuery}"`}
+                            </p>
+                        )}
                     </div>
 
                     {/* Feed Content */}
                     <div className="flex-1 overflow-y-auto scroll-smooth p-6">
                         <div className="max-w-3xl mx-auto flex flex-col gap-6 pb-20">
 
-                            {/* Simple Composer */}
-                            <div className="bg-white rounded-xl border border-blue-100 p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-400 transition-all">
-
-                                {/* Composer Input */}
-                                <div className="flex gap-3">
-                                    <div className="size-10 rounded-full bg-gray-100 bg-cover bg-center shrink-0" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDchVeb3pnQlG7miYN4K2qZ3FvzJ_BraFfz7fnE81y6daVb93_nRvdtmIe5JhDRWYUdniaxDtf5aOMeFEmMH_uKnO3jaGZcMIiV1OOqhbDuBV6iZMmHNro2d4fd1I_yoys75ES60YwCpQFin-dgLs6X1pmJKBT70K1ONBeTAzsRG_HEHX5AC6ICuZkdmV5cHJyejbkmy13_hZS_EZFXELG3W2x0JXa01xdub5lXyGmShDjpaGpE5ehLI9I3fJvA-46_b0sixf8Fdg")' }}></div>
-                                    <div className="flex-1">
-                                        <input
-                                            className="w-full h-10 px-0 rounded-lg outline-none text-sm placeholder:text-gray-400 bg-transparent"
-                                            placeholder="What do you want to ask or share?"
-                                            type="text"
-                                            value={newPostText}
-                                            onChange={(e) => setNewPostText(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handlePostSubmit()}
-                                        />
-                                    </div>
+                            {error && (
+                                <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                                    <span className="material-symbols-outlined text-[20px]">error</span>
+                                    <p className="text-sm font-bold flex-1">{error}</p>
+                                    <button onClick={() => setError(null)} className="p-1 hover:bg-rose-100 rounded-lg transition-colors">
+                                        <span className="material-symbols-outlined text-[18px]">close</span>
+                                    </button>
                                 </div>
+                            )}
 
-                                {/* Image Preview */}
-                                {selectedImage && (
-                                    <div className="px-4 pb-3 relative inline-block mt-2">
-                                        <img src={selectedImage} alt="Preview" className="h-20 w-auto rounded-lg border border-gray-200 object-cover" />
-                                        <button
-                                            onClick={removeImage}
-                                            className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-md border border-gray-200 hover:bg-gray-100 transition-colors"
-                                        >
-                                            <span className="material-symbols-outlined !text-[14px] text-gray-500 block">close</span>
-                                        </button>
-                                    </div>
-                                )}
 
-                                {/* Toolbar */}
-                                <div className="flex items-center justify-between pt-2 mt-2">
-                                    <div className="flex gap-2">
-
-                                        <button
-                                            onClick={() => fileInputRef.current.click()}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-gray-100 transition-colors text-xs font-semibold text-gray-600"
-                                        >
-                                            <span className="material-symbols-outlined !text-[18px] text-gray-500">image</span> Photo
-                                        </button>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            ref={fileInputRef}
-                                            onChange={handleImageUpload}
-                                        />
-                                    </div>
+                            {/* Post Composer */}
+                            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                                <div className="flex gap-3">
+                                    <div
+                                        className="size-9 rounded-full bg-slate-200 bg-cover bg-center shrink-0"
+                                        style={{ backgroundImage: `url("${user?.avatarUrl || user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'}")` }}
+                                    />
+                                    <textarea
+                                        className="flex-1 min-h-[56px] text-sm outline-none placeholder:text-slate-400 bg-transparent resize-none border-0 focus:ring-0"
+                                        placeholder="What do you want to ask or share? AI will auto-categorize your post."
+                                        value={newPostText}
+                                        onChange={e => setNewPostText(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handlePostSubmit()}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-end pt-3 mt-3 border-t border-slate-100">
                                     <button
                                         onClick={handlePostSubmit}
-                                        className={`px-4 py-1.5 rounded-full transition-all flex items-center justify-center text-xs font-bold ${newPostText.trim() ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
-                                        disabled={!newPostText.trim()}
+                                        disabled={!newPostText.trim() || isPosting}
+                                        className={`px-6 py-2 rounded-xl text-sm font-bold transition-all shadow flex items-center gap-2 ${newPostText.trim() && !isPosting ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
                                     >
-                                        Post
+                                        {isPosting && <span className="size-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>}
+                                        {isPosting ? 'Uploading...' : 'Post'}
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Scrollable Filter Chips */}
-                            <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
-                                <button
-                                    onClick={() => executeAction(() => setSelectedFilter('All Topics'))}
-                                    className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${selectedFilter === 'All Topics' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
-                                >
-                                    All Topics
-                                </button>
-                                {['Admissions', 'Scholarships', 'Visas', 'Accommodation', 'Career Advice', 'Routine'].map(filter => (
+                            {/* Filter Chips */}
+                            <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-6 px-6 scrollbar-hide">
+                                {['Algorithmic Feed', 'Admissions', 'Scholarships', 'Visas', 'Finances', 'Career Advice'].map(filter => (
                                     <button
                                         key={filter}
-                                        onClick={() => executeAction(() => setSelectedFilter(filter))}
-                                        className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition-all ${selectedFilter === filter ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'}`}
+                                        onClick={() => setSelectedFilter(filter)}
+                                        className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5
+                                            ${selectedFilter === filter
+                                                ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20'
+                                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                                            }`}
                                     >
+                                        {filter === 'Algorithmic Feed' && (
+                                            <span className="material-symbols-outlined text-[14px]">dynamic_feed</span>
+                                        )}
                                         {filter}
                                     </button>
                                 ))}
                             </div>
 
+                            {/* Loading Skeleton */}
+                            {isLoading && (
+                                <div className="flex flex-col gap-4">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="animate-pulse bg-white p-6 rounded-2xl border border-slate-100 space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-10 bg-slate-200 rounded-full" />
+                                                <div className="h-3 bg-slate-200 rounded w-1/4" />
+                                            </div>
+                                            <div className="h-4 bg-slate-200 rounded w-3/4" />
+                                            <div className="h-3 bg-slate-200 rounded w-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Empty State */}
+                            {!isLoading && filteredPosts.length === 0 && (
+                                <div className="flex flex-col items-center justify-center py-20 text-center">
+                                    <span className="material-symbols-outlined text-slate-300 text-[64px] mb-4">find_in_page</span>
+                                    <p className="text-slate-500 font-semibold text-lg">No posts found</p>
+                                    <p className="text-slate-400 text-sm mt-1">Try a different keyword or category</p>
+                                </div>
+                            )}
+
                             {/* Post List */}
-                            <div className="flex flex-col gap-4">
-                                {posts
-                                    .filter(post => {
-                                        // Filter by Category/Tags
-                                        const matchCategory = selectedFilter === 'All Topics' || post.category === selectedFilter || post.tags.includes(selectedFilter);
-                                        // Filter by Search Query
-                                        const matchSearch = !searchQuery.trim() || post.title.toLowerCase().includes(searchQuery.toLowerCase()) || (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase()));
-                                        return matchCategory && matchSearch;
-                                    })
-                                    .map(post => (
-                                        <article
-                                            key={post.id}
-                                            className="bg-white rounded-xl border border-gray-200 shadow-sm transition-all group flex overflow-hidden w-full text-left"
-                                        >
-                                            {/* Voting */}
-                                            <div className="w-12 bg-gray-50 border-r border-gray-100 flex flex-col items-center py-3 gap-1 shrink-0">
-                                                <button
-                                                    onClick={(e) => { e.stopPropagation(); handleVote(post.id, 'up'); }}
-                                                    className="text-gray-400 hover:text-primary hover:bg-blue-50 rounded p-1 transition-colors"
+                            {!isLoading && filteredPosts.map(post => (
+                                <article
+                                    id={`post-${post._id}`}
+                                    key={post._id}
+                                    className={`bg-white rounded-2xl border transition-all duration-700 overflow-hidden 
+                                        ${highlightedPostId === post._id
+                                            ? 'border-indigo-500 ring-4 ring-indigo-100 shadow-xl bg-indigo-50/10'
+                                            : 'border-slate-200 shadow-sm hover:shadow-md'}`}
+                                >
+                                    {/* Top: author + meta */}
+                                    {/* Content Only (Like moved below) */}
+                                    <div className="flex gap-4 p-5">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-2 text-xs text-slate-500">
+                                                <div
+                                                    className="size-6 rounded-full bg-slate-200 bg-cover bg-center shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-300 transition-all"
+                                                    style={{ backgroundImage: `url("${post.avatar}")` }}
+                                                    onClick={() => navigate(`/profile/${(post as any).authorUsername || post.author}`)}
+                                                />
+                                                <span
+                                                    className="font-bold text-slate-800 cursor-pointer hover:text-indigo-600 transition-colors"
+                                                    onClick={() => navigate(`/profile/${(post as any).authorUsername || post.author}`)}
                                                 >
-                                                    <span className="material-symbols-outlined text-[20px]">arrow_upward</span>
+                                                    {post.author}
+                                                </span>
+                                                <span>•</span>
+                                                <span>{post.time}</span>
+                                            </div>
+
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="text-base font-bold text-slate-900 leading-snug">
+                                                    {translations[post._id]?.isLoading ? 'Translating...' : (translations[post._id]?.title || post.title)}
+                                                </h3>
+
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[8px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter shrink-0 animate-pulse">Beta</span>
+                                                    <select
+                                                        className="text-[10px] bg-slate-50 border-none rounded p-1 text-slate-500 font-bold focus:ring-0 cursor-pointer"
+                                                        value={translations[post._id]?.lang || 'en'}
+                                                        onChange={(e) => handleTranslate(post._id, post.title, post.content, e.target.value)}
+                                                    >
+                                                        {SUPPORTED_LANGUAGES.map(l => (
+                                                            <option key={l.code} value={l.code}>{l.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {post.content && (
+                                                <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                                                    {translations[post._id]?.isLoading ? 'Please wait...' : (translations[post._id]?.content || post.content)}
+                                                </p>
+                                            )}
+
+                                            {/* Tags */}
+                                            <div className="flex flex-wrap gap-1.5 mb-3">
+                                                {post.tags.map(tag => (
+                                                    <span key={tag} className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-semibold">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            {/* AI Summary (shown for posts with a summary when collapsed) */}
+                                            {post.tldrSummary && !visibleComments[post._id] && (
+                                                <div className="flex gap-2 items-start p-3 rounded-xl bg-indigo-50/60 border border-indigo-100 mb-3">
+                                                    <span className="material-symbols-outlined text-indigo-400 text-[16px] mt-0.5 shrink-0">auto_awesome</span>
+                                                    <p className="text-xs text-indigo-800 font-medium leading-relaxed">
+                                                        <strong>AI Summary:</strong> {post.tldrSummary}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Action Row */}
+                                            <div className="flex items-center gap-4 text-xs text-slate-500 font-semibold border-t border-slate-50 pt-3">
+                                                {/* Like button in Action Row */}
+                                                <button
+                                                    onClick={() => handleLike(post._id)}
+                                                    className={`flex items-center gap-1.5 transition-colors ${post.hasLiked ? 'text-rose-500' : 'hover:text-rose-500'}`}
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: post.hasLiked ? "'FILL' 1" : "'FILL' 0" }}>
+                                                        favorite
+                                                    </span>
+                                                    <span className="tabular-nums">{post.score}</span>
+                                                    <span>{post.score === 1 ? 'Like' : 'Likes'}</span>
                                                 </button>
-                                                <span className={`text-sm font-bold ${post.votes > 0 ? 'text-primary' : post.votes < 0 ? 'text-red-600' : 'text-gray-900'}`}>{post.votes}</span>
+
                                                 <button
-                                                    onClick={(e) => { e.stopPropagation(); handleVote(post.id, 'down'); }}
-                                                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded p-1 transition-colors"
+                                                    onClick={() => toggleComments(post._id)}
+                                                    className={`flex items-center gap-1.5 transition-colors ${visibleComments[post._id] ? 'text-indigo-600' : 'hover:text-indigo-600'}`}
                                                 >
-                                                    <span className="material-symbols-outlined text-[20px]">arrow_downward</span>
+                                                    <span className="material-symbols-outlined text-[18px]">
+                                                        {visibleComments[post._id] ? 'chat_bubble' : 'chat_bubble_outline'}
+                                                    </span>
+                                                    {post.commentsCount} {post.commentsCount === 1 ? 'Comment' : 'Comments'}
+                                                </button>
+
+                                                <button
+                                                    onClick={() => { setShareData(post); setIsShareModalOpen(true); }}
+                                                    className="flex items-center gap-1.5 hover:text-indigo-600 transition-colors"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">ios_share</span>
+                                                    Share
                                                 </button>
                                             </div>
-                                            {/* Content */}
-                                            <div className="flex-1 p-3 sm:p-4 min-w-0">
-                                                <div className="flex items-center gap-2 mb-2 text-xs text-gray-500 flex-wrap">
-                                                    <div className="size-6 rounded-full bg-cover bg-center shrink-0" style={{ backgroundImage: `url("${post.avatar}")` }}></div>
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); executeAction(() => navigate(`/profile/${post.author}`)); }}
-                                                        className="font-medium text-gray-900 hover:underline hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer text-left"
-                                                    >
-                                                        {post.author}
-                                                    </button>
-                                                    {(post as any).isVerifiedAttributes && (
-                                                        <span className="flex items-center gap-1 text-[10px] font-bold text-blue-600 whitespace-nowrap">
-                                                            <span className="material-symbols-outlined !text-[14px]">verified</span> {(post as any).verifiedLabel}
-                                                        </span>
-                                                    )}
-                                                    {post.isExpert && (
-                                                        <span className="flex items-center gap-1 text-[10px] font-bold text-orange-700 whitespace-nowrap">
-                                                            <span className="material-symbols-outlined !text-[14px]">star</span> Expert
-                                                        </span>
-                                                    )}
-                                                    <span className="whitespace-nowrap">• {post.time}</span>
-                                                </div>
-                                                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 leading-snug transition-colors break-words">
-                                                    {post.title}
-                                                </h3>
-                                                {(post as any).image && (
-                                                    <div className="h-48 w-full rounded-lg bg-gray-200 mt-2 mb-3 bg-cover bg-center border border-gray-100" style={{ backgroundImage: `url("${(post as any).image}")` }}></div>
-                                                )}
-                                                {post.content && (
-                                                    <p className="text-sm text-gray-600 leading-relaxed mb-3 break-words">
-                                                        {/* Simple truncation logic */}
-                                                        {!expandedPosts[post.id] && post.content.length > 120 ? (
-                                                            <>
-                                                                {post.content.substring(0, 120)}... <span className="text-primary font-medium cursor-pointer hover:underline" onClick={(e) => { e.stopPropagation(); toggleReadMore(post.id); }}>more</span>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                {post.content} {post.content.length > 120 && <span className="text-gray-400 text-xs cursor-pointer hover:underline ml-2" onClick={(e) => { e.stopPropagation(); toggleReadMore(post.id); }}>less</span>}
-                                                            </>
-                                                        )}
-                                                    </p>
-                                                )}
-                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-auto gap-3 sm:gap-0">
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        {post.tags.map(tag => (
-                                                            <span key={tag} className="px-2 py-1 rounded bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium whitespace-nowrap">{tag}</span>
-                                                        ))}
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-gray-500 text-xs font-medium w-full sm:w-auto justify-between sm:justify-start border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-50">
-                                                        <button onClick={(e) => { e.stopPropagation(); toggleComments(post.id); }} className="flex items-center gap-1.5 hover:text-gray-900 transition-colors">
-                                                            <span className="material-symbols-outlined text-[18px]">mode_comment</span>
-                                                            {post.type === 'question' ? (
-                                                                <span>{(post as any).answers?.length || 0} Comments</span>
-                                                            ) : (
-                                                                <span>{post.commentsCount} Comments</span>
-                                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* ── Comment Section ───────────────────── */}
+                                    {visibleComments[post._id] && (
+                                        <div className="border-t border-slate-100 bg-slate-50 px-5 py-4 flex flex-col gap-4">
+
+                                            {/* Comment Input */}
+                                            <div className="flex flex-col gap-2">
+                                                {replyingTo?.postId === post._id && (
+                                                    <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1.5 self-start">
+                                                        <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Replying to {replyingTo.authorName}</span>
+                                                        <button
+                                                            onClick={() => setReplyingTo(null)}
+                                                            className="material-symbols-outlined text-[14px] text-indigo-400 hover:text-indigo-600 transition-colors"
+                                                        >
+                                                            close
                                                         </button>
-                                                        <div className="flex items-center gap-4">
-                                                            <button onClick={(e) => { e.stopPropagation(); openShareModal(post); }} className="flex items-center gap-1.5 hover:text-gray-900 transition-colors">
-                                                                <span className="material-symbols-outlined text-[18px]">share</span> Share
-                                                            </button>
-                                                            {/* Only show delete for current user */}
-                                                            {post.author === currentUser && (
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleDeletePost(post.id);
-                                                                    }}
-                                                                    className="flex items-center gap-1.5 hover:text-red-600 transition-colors"
-                                                                    title="Delete Post"
-                                                                    type="button"
-                                                                >
-                                                                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                                                                </button>
-                                                            )}
-                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="flex gap-3 items-start">
+                                                    <div
+                                                        className="size-8 rounded-full bg-slate-200 bg-cover bg-center shrink-0 mt-1"
+                                                        style={{ backgroundImage: `url("${user?.avatarUrl || user?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'}")` }}
+                                                    />
+                                                    <div className="flex-1 flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            placeholder={replyingTo?.postId === post._id ? `Reply to ${replyingTo.authorName}...` : "Write a comment..."}
+                                                            className="flex-1 text-sm border border-slate-200 rounded-xl px-4 py-2.5 bg-white focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-50 transition-all"
+                                                            value={commentInputs[post._id] || ''}
+                                                            onChange={e => setCommentInputs(prev => ({ ...prev, [post._id]: e.target.value }))}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter') handleCommentSubmit(post._id);
+                                                            }}
+                                                        />
+                                                        <button
+                                                            onClick={() => handleCommentSubmit(post._id)}
+                                                            disabled={!commentInputs[post._id]?.trim()}
+                                                            className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors h-[42px]"
+                                                        >
+                                                            Send
+                                                        </button>
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                {/* Answer/Comment Section */}
-                                                {visibleComments[post.id] && (
-                                                    <div className="mt-4 pt-4 border-t border-gray-100">
-                                                        {/* Standard Comments Input */}
-                                                        <div className="flex gap-3 mb-4">
-                                                            <div className="size-8 rounded-full bg-gray-200 bg-cover bg-center shrink-0" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDchVeb3pnQlG7miYN4K2qZ3FvzJ_BraFfz7fnE81y6daVb93_nRvdtmIe5JhDRWYUdniaxDtf5aOMeFEmMH_uKnO3jaGZcMIiV1OOqhbDuBV6iZMmHNro2d4fd1I_yoys75ES60YwCpQFin-dgLs6XN1pmJKBT70K1ONBeTAzsRG_HEHX5AC6ICuZkdmV5cHJyejbkmy13_hZS_EZFXELG3W2x0JXa01xdub5lXyGmShDjpaGpE5ehLI9I3fJvA-46_b0sixf8Fdg")' }}></div>
-                                                            <div className="flex-1 flex gap-2">
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder="Add a comment..."
-                                                                    className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                                                                    value={commentInputs[post.id] || ''}
-                                                                    onChange={(e) => handleCommentChange(post.id, e.target.value)}
-                                                                    onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit(post.id)}
-                                                                />
-                                                                <button
-                                                                    onClick={() => handleCommentSubmit(post.id)}
-                                                                    disabled={!commentInputs[post.id]?.trim()}
-                                                                    className="px-3 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                                                >
-                                                                    Post
-                                                                </button>
-                                                            </div>
-                                                        </div>
+                                            {/* Comments List */}
+                                            {post.comments.length === 0 ? (
+                                                <p className="text-xs text-slate-400 text-center py-2">No comments yet — be the first!</p>
+                                            ) : (
+                                                <div className="flex flex-col gap-4">
+                                                    {/* Group comments into parent-child structure for simple one-level threading */}
+                                                    {post.comments
+                                                        .filter(c => !c.replyTo) // Root comments
+                                                        .map((parentComment, pIdx) => {
+                                                            const replies = post.comments.filter(c => c.replyTo === parentComment._id);
 
-                                                        {/* Comments List */}
-                                                        <div className="flex flex-col gap-4">
-                                                            {(post.type === 'question' ? (post.answers || []) : post.comments).slice(0, visibleCommentCounts[post.id] || 3).map((comment, idx) => (
-                                                                <div key={idx} className="flex gap-3">
-                                                                    <div className="size-7 rounded-full bg-gray-200 bg-cover bg-center shrink-0" style={{ backgroundImage: `url("${comment.avatar}")` }}></div>
-                                                                    <div className="flex-1">
-                                                                        <div className={`rounded-lg px-3 py-2 ${comment.author === 'AI Assistant' ? 'bg-blue-50 border border-blue-100' : 'bg-gray-50'}`}>
-                                                                            <div className="flex justify-between items-start">
-                                                                                <div className="flex flex-col">
-                                                                                    <div className="flex items-center gap-1.5">
-                                                                                        <p className={`text-xs font-bold mb-0.5 ${comment.author === 'AI Assistant' ? 'text-blue-700' : 'text-gray-900'}`}>{comment.author}</p>
-                                                                                        {comment.author === 'AI Assistant' && (
-                                                                                            <span className="material-symbols-outlined text-[14px] text-blue-600">smart_toy</span>
+                                                            const renderCommentObj = (comment: Comment, idx: number, isReply: boolean = false) => {
+                                                                const isAI = comment.author === 'AI Assistant';
+                                                                const currentUserName = user?.displayName || 'Guest';
+                                                                const isOwn = !isAI && comment.author === currentUserName;
+                                                                // Use a unique indicator for editing: {postId, commentId}
+                                                                const isBeingEdited = editingComment?.postId === post._id && editingComment?.idx === idx;
+
+                                                                return (
+                                                                    <div key={comment._id || idx} className={`flex gap-3 group/comment ${isReply ? 'ml-10 mt-1' : ''}`}>
+                                                                        <div
+                                                                            className={`${isReply ? 'size-6' : 'size-7'} rounded-full bg-slate-200 bg-cover bg-center shrink-0 mt-0.5`}
+                                                                            style={{ backgroundImage: `url("${comment.avatar}")` }}
+                                                                        />
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className={`rounded-xl px-3.5 py-2.5 ${isAI ? 'bg-indigo-50 border border-indigo-100' : 'bg-white border border-slate-100'}`}>
+                                                                                {/* Header row */}
+                                                                                <div className="flex items-center gap-1.5 mb-1">
+                                                                                    <span className={`text-xs font-bold ${isAI ? 'text-indigo-700' : 'text-slate-900'}`}>
+                                                                                        {comment.author}
+                                                                                    </span>
+                                                                                    {isAI && (
+                                                                                        <span className="material-symbols-outlined text-[13px] text-indigo-500">smart_toy</span>
+                                                                                    )}
+                                                                                    {comment.isEdited && (
+                                                                                        <span className="text-[10px] text-slate-400 italic font-medium">(edited)</span>
+                                                                                    )}
+                                                                                    <span className="text-[10px] text-slate-400 ml-auto whitespace-nowrap">{comment.time}</span>
+                                                                                    <div className="flex gap-1">
+                                                                                        {!isReply && (
+                                                                                            <button
+                                                                                                title="Reply"
+                                                                                                onClick={() => setReplyingTo({ postId: post._id, commentId: comment._id || '', authorName: comment.author })}
+                                                                                                className="opacity-0 group-hover/comment:opacity-100 transition-opacity p-0.5 rounded hover:bg-slate-100 text-slate-400 hover:text-indigo-600"
+                                                                                            >
+                                                                                                <span className="material-symbols-outlined text-[14px]">reply</span>
+                                                                                            </button>
+                                                                                        )}
+                                                                                        {isOwn && !isBeingEdited && (
+                                                                                            <button
+                                                                                                title="Edit comment"
+                                                                                                onClick={() => {
+                                                                                                    // Find the index in original array
+                                                                                                    const realIdx = post.comments.findIndex(c => c._id === comment._id);
+                                                                                                    setEditingComment({ postId: post._id, idx: realIdx, draft: comment.text });
+                                                                                                }}
+                                                                                                className="opacity-0 group-hover/comment:opacity-100 transition-opacity p-0.5 rounded hover:bg-slate-100 text-slate-400 hover:text-indigo-600"
+                                                                                            >
+                                                                                                <span className="material-symbols-outlined text-[14px]">edit</span>
+                                                                                            </button>
                                                                                         )}
                                                                                     </div>
-                                                                                    {comment.bio && <span className="text-[10px] text-gray-500 mb-0.5">{comment.bio}</span>}
                                                                                 </div>
-                                                                                <span className="text-[10px] text-gray-400">{comment.time || '2d ago'}</span>
+
+                                                                                {isBeingEdited ? (
+                                                                                    <div className="flex flex-col gap-2 mt-1">
+                                                                                        <textarea
+                                                                                            autoFocus
+                                                                                            rows={2}
+                                                                                            className="w-full text-xs border border-indigo-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-none bg-white"
+                                                                                            value={editingComment.draft}
+                                                                                            onChange={e => setEditingComment({ ...editingComment, draft: e.target.value })}
+                                                                                            onKeyDown={e => {
+                                                                                                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleCommentSave(post._id, editingComment.idx); }
+                                                                                                if (e.key === 'Escape') setEditingComment(null);
+                                                                                            }}
+                                                                                        />
+                                                                                        <div className="flex gap-2 justify-end">
+                                                                                            <button
+                                                                                                onClick={() => setEditingComment(null)}
+                                                                                                className="px-3 py-1 text-[11px] font-semibold text-slate-500 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                                                                                            >
+                                                                                                Cancel
+                                                                                            </button>
+                                                                                            <button
+                                                                                                onClick={() => handleCommentSave(post._id, editingComment.idx)}
+                                                                                                disabled={!editingComment.draft.trim()}
+                                                                                                className="px-3 py-1 text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors disabled:opacity-40"
+                                                                                            >
+                                                                                                Save
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <p className={`text-xs leading-relaxed ${isAI ? 'text-indigo-800' : 'text-slate-700'}`}>
+                                                                                        {comment.text}
+                                                                                    </p>
+                                                                                )}
                                                                             </div>
-                                                                            <p className={`text-xs leading-relaxed ${comment.author === 'AI Assistant' ? 'text-blue-900' : 'text-gray-700'}`}>{comment.text}</p>
                                                                         </div>
-
-
-
                                                                     </div>
-                                                                </div>
-                                                            ))}
+                                                                );
+                                                            };
 
-                                                            {(post.type === 'question' ? (post.answers || []) : post.comments).length > (visibleCommentCounts[post.id] || 3) && (
-                                                                <button
-                                                                    onClick={() => loadMoreComments(post.id)}
-                                                                    className="w-full py-2 bg-gray-50 hover:bg-gray-100 text-blue-600 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 mt-2"
-                                                                >
-                                                                    View more comments <span className="material-symbols-outlined !text-[16px]">expand_more</span>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </article>
-                                    ))}
-                            </div>
+                                                            return (
+                                                                <div key={parentComment._id || pIdx} className="flex flex-col gap-2">
+                                                                    {renderCommentObj(parentComment, post.comments.indexOf(parentComment))}
+                                                                    {replies.map((reply, rIdx) => renderCommentObj(reply, post.comments.indexOf(reply), true))}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </article>
+                            ))}
                         </div>
                     </div>
                 </main>
 
-                {/* RIGHT SIDEBAR: Widgets */}
-                <aside className="hidden xl:flex w-80 flex-col h-full border-l border-border-subtle bg-white overflow-y-auto shrink-0 z-10 p-5">
-                    {/* Search Widget Removed */}
+                {/* ── RIGHT SIDEBAR ──────────────────────────────────── */}
+                <aside className="hidden xl:flex w-72 flex-col h-full border-l border-slate-200 bg-white overflow-y-auto shrink-0 p-5 gap-6">
 
-                    {/* Trending Card */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5 mt-12">
-                        <div className="p-4 bg-cover bg-center relative" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=500&auto=format&fit=crop")' }}>
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <h3 className="relative text-white font-bold text-lg z-10">Trending Today</h3>
+                    {/* Trending */}
+                    <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 shadow-sm">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="material-symbols-outlined text-rose-500 text-[20px]">local_fire_department</span>
+                            <h3 className="font-extrabold text-slate-900 text-sm">Algorithmic Trending</h3>
                         </div>
-                        <div className="flex flex-col">
-                            <button className="px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 text-left" onClick={() => executeAction(() => { })}>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Visas • Trending</p>
-                                <p className="text-sm font-semibold text-gray-900 leading-snug">F-1 Visa Slot Availability Update</p>
-                                <p className="text-xs text-gray-500 mt-1">204 posts participating</p>
-                            </button>
-                            <button className="px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 text-left" onClick={() => executeAction(() => { })}>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Destinations • Hot</p>
-                                <p className="text-sm font-semibold text-gray-900 leading-snug">Best Student Cities in Europe 2024</p>
-                                <p className="text-xs text-gray-500 mt-1">89 new comments</p>
-                            </button>
-                            <button className="px-4 py-3 hover:bg-gray-50 transition-colors text-left" onClick={() => executeAction(() => { })}>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide mb-0.5">Finance</p>
-                                <p className="text-sm font-semibold text-gray-900 leading-snug">Forex Card vs Bank Transfer?</p>
-                                <p className="text-xs text-gray-500 mt-1">15 posts today</p>
-                            </button>
+                        <p className="text-[10px] text-slate-400 font-medium mb-3 pb-3 border-b border-slate-200 uppercase tracking-wide">
+                            TF-IDF scan · last 24hrs
+                        </p>
+                        <div className="flex flex-col divide-y divide-slate-100">
+                            {trendingTopics.map((t, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setSelectedFilter(t.label)}
+                                    className="py-2.5 text-left hover:bg-slate-100 rounded-lg -mx-1 px-1 transition-colors group"
+                                >
+                                    <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">{t.label}</p>
+                                    <p className="text-sm font-bold text-slate-800 leading-snug line-clamp-1 group-hover:text-indigo-700 transition-colors">{t.topic}</p>
+                                    <p className="text-[10px] text-slate-400 mt-0.5">{t.activityCount} mentions</p>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-
-
-                    <div className="text-xs text-gray-400 flex flex-wrap gap-2 px-2">
-                        <a className="hover:underline" href="#">About</a>
-                        <span>•</span>
-                        <a className="hover:underline" href="#">Privacy</a>
-                        <span>•</span>
-                        <a className="hover:underline" href="#">Terms</a>
-                        <span>•</span>
-                        <span>© 2024 EAOverseas</span>
-                    </div>
+                    <p className="text-[10px] text-slate-300 text-center font-medium">© 2024 EAOverseas Community v2</p>
                 </aside>
             </div>
 
@@ -1178,15 +1071,62 @@ const CommunityFeed = () => {
                     isOpen={isShareModalOpen}
                     onClose={() => setIsShareModalOpen(false)}
                     title="Share Discussion"
-                    shareUrl={`https://eaoverseas.com/community/discussion-${shareData.id}`}
+                    shareUrl={`${window.location.origin}/community-feed?post=${shareData._id}`}
                     preview={{
                         title: shareData.title,
                         subtitle: "EAOverseas Community",
-                        icon: "https://cdn-icons-png.flaticon.com/512/1256/1256650.png"
+                        image: "https://cdn-icons-png.flaticon.com/512/1256/1256650.png"
                     }}
                 />
             )}
-        </div >
+
+            {/* AI Safety Violation Modal */}
+            {safetyViolation?.active && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-rose-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
+                        <div className="size-20 bg-rose-50 rounded-full flex items-center justify-center mb-6 relative">
+                            <span className="material-symbols-outlined text-rose-500 text-[40px] animate-pulse">report</span>
+                            <div className="absolute inset-0 rounded-full border-4 border-rose-500/20 animate-ping" />
+                        </div>
+
+                        <h2 className="text-xl font-bold text-slate-900 mb-2">Content Flagged by AI</h2>
+                        <p className="text-sm text-slate-500 leading-relaxed mb-8">
+                            Our AI moderation system detected unsafe or abusive content. To protect the community, your draft will be deleted in:
+                        </p>
+
+                        <div className="size-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-3xl font-black mb-8 shadow-xl shadow-rose-900/10">
+                            {safetyViolation.countdown}
+                        </div>
+
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                            <div
+                                className="h-full bg-rose-500 transition-all duration-1000 ease-linear"
+                                style={{ width: `${(safetyViolation.countdown / 5) * 100}%` }}
+                            />
+                        </div>
+                        <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Auto-Deleting Community Post</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Floating Chat Window → Inline Right Panel */}
+            {activeChat && (
+                <div className="fixed bottom-4 right-4 z-50 max-w-[calc(100vw-2rem)]" style={{ width: chatWidth, height: 'calc(100vh - 6rem)' }}>
+                    <div className="h-full rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+                        <ChatWindow
+                            conversationId={activeChat.conversationId}
+                            currentUserId={user?.uid || ''}
+                            partnerName={activeChat.partnerName}
+                            partnerAvatar={activeChat.partnerAvatar}
+                            onClose={() => setActiveChat(null)}
+                            socket={socketRef}
+                            width={chatWidth}
+                            onResize={handleChatResize}
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
