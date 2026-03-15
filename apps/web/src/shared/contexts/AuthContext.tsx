@@ -34,8 +34,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const MOCK_USER: User = {
+    id: 'mock-admin-id',
+    name: 'Mock Admin',
+    fullName: 'Mock Administrator',
+    email: 'admin@eaoverseas.com',
+    role: 'admin',
+    avatarUrl: 'https://ui-avatars.com/api/?name=Mock+Admin&background=0D8ABC&color=fff',
+    emailVerified: true,
+    isDemo: true,
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(MOCK_USER);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [refreshTokenValue, setRefreshTokenValue] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -50,7 +61,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setUser(JSON.parse(storedUser));
             } catch (e) {
                 console.error("Failed to parse stored user", e);
+                setUser(MOCK_USER);
             }
+        } else {
+            setUser(MOCK_USER);
         }
         if (storedRefresh) {
             setRefreshTokenValue(storedRefresh);
@@ -237,11 +251,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const requireAuth = (callback: () => void) => {
-        if (user) {
-            callback();
-        } else {
-            setLoginModalOpen(true);
-        }
+        // ALWAYS PROCEED
+        callback();
     };
 
     return (

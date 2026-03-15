@@ -145,13 +145,7 @@ import ProtectedRoute from '@/shared/components/ProtectedRoute';
 import CountryDetails from '@/pages/CountryDetails';
 
 const HomeRoute = () => {
-    const { user } = useAuth();
-    if (user) {
-        if (user.role === 'admin') {
-            return <Navigate to="/Superadmin" replace />;
-        }
-        return <Navigate to="/dashboard" replace />;
-    }
+    // REDIRECTION DISABLED - ALWAYS SHOW LANDING AT ROOT
     return <LandingPage />;
 };
 
