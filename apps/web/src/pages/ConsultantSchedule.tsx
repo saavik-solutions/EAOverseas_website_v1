@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 
-const ConsultantSchedule = () => {
+const ConsultantSchedule = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     // UI State
     const [view, setView] = useState('week'); // 'week' | 'month'
 

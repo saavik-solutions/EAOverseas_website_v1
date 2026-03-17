@@ -47,7 +47,7 @@ const MOCK_USER: User = {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(MOCK_USER);
-    const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [accessToken, setAccessToken] = useState<string | null>(MOCK_USER ? 'DEV_ADMIN_TOKEN_2026' : null);
     const [refreshTokenValue, setRefreshTokenValue] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [isLoginModalOpen, setLoginModalOpen] = useState(false);
@@ -56,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const storedUser = localStorage.getItem('eaoverseas_user');
         const storedRefresh = localStorage.getItem('eaoverseas_refresh_token');
+        const storedToken = localStorage.getItem('token');
         if (storedUser) {
             try {
                 setUser(JSON.parse(storedUser));
@@ -65,6 +66,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         } else {
             setUser(MOCK_USER);
+        }
+        if (storedToken) {
+            setAccessToken(storedToken);
+        } else if (!storedUser && MOCK_USER) {
+            setAccessToken('DEV_ADMIN_TOKEN_2026');
+            localStorage.setItem('token', 'DEV_ADMIN_TOKEN_2026');
         }
         if (storedRefresh) {
             setRefreshTokenValue(storedRefresh);
@@ -98,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (res.ok) {
                 const data = await res.json();
                 setAccessToken(data.accessToken);
+                localStorage.setItem('token', data.accessToken);
             }
         } catch (e) {
             console.error("Token refresh failed", e);
@@ -115,6 +123,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // ── LOGIN ───────────────────────────────────────────────────────────
     const login = async (email: string, password: string): Promise<User> => {
+        // ── 1. Check admin-created users first (offline-first & testing) ──
+        try {
+            const storedUsers = localStorage.getItem('mock_created_users');
+            if (storedUsers) {
+                const createdUsers: Array<{ id: string; name: string; email: string; password: string; role: string }> = JSON.parse(storedUsers);
+                const match = createdUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+                if (match) {
+                    const createdUser: User = {
+                        id: match.id,
+                        name: match.name,
+                        fullName: match.name,
+                        email: match.email,
+                        role: match.role,
+                        isDemo: true,
+                    };
+                    setUser(createdUser);
+                    localStorage.setItem('eaoverseas_user', JSON.stringify(createdUser));
+                    return createdUser;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not parse mock_created_users', e);
+        }
+
+        // ── 2. Try the real API ─────────────────────────────────────────
         try {
             const res = await fetch(`${API_BASE}/auth/login`, {
                 method: 'POST',
@@ -127,20 +160,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!res.ok) {
                 // FALLBACK FOR TESTING MODE
                 console.warn("Login failed with API, checking if we should use fallback for testing", data);
-                if (email.includes('university') || email.includes('kcl.ac.uk') || email.includes('utoronto.ca') || localStorage.getItem('ea_auto_fill_university')) {
+                if (email.includes('university') || email.includes('kcl.ac.uk') || email.includes('utoronto.ca')) {
+                    const uniName = localStorage.getItem('ea_auto_fill_university') || 'Toronto';
                     const mockUniUser: User = {
                         id: 'mock-uni-' + Math.random().toString(36).substr(2, 4),
                         name: email.split('@')[0],
                         fullName: email.split('@')[0],
                         email: email,
                         role: 'University',
-                        university: localStorage.getItem('ea_auto_fill_university') || 'Toronto',
+                        university: uniName,
                         isDemo: true,
                     };
                     setUser(mockUniUser);
                     localStorage.setItem('eaoverseas_user', JSON.stringify(mockUniUser));
                     return mockUniUser;
                 }
+
+                // Fallback for Student, Counsellor, Vendors, etc if needed...
                 throw new Error(data.error || 'Login failed');
             }
 
@@ -160,14 +196,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setRefreshTokenValue(data.refreshToken);
             localStorage.setItem('eaoverseas_user', JSON.stringify(loggedInUser));
             localStorage.setItem('eaoverseas_refresh_token', data.refreshToken);
+            localStorage.setItem('token', data.accessToken);
 
             return loggedInUser;
         } catch (err: any) {
             console.warn("Login exception, using fallback for testing", err);
             // FALLBACK FOR TESTING MODE (Network errors etc)
-            const role = email.includes('admin') ? 'admin' :
+            const role = email.includes('admin') ? 'Admin' :
                 email.includes('counsellor') ? 'Counsellor' :
-                    (email.includes('university') || localStorage.getItem('ea_auto_fill_university')) ? 'University' : 'Student';
+                    email.includes('university') ? 'University' : 'Student';
 
             const mockUser: User = {
                 id: 'mock-test-' + Math.random().toString(36).substr(2, 4),
@@ -285,6 +322,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setRefreshTokenValue(null);
         localStorage.removeItem('eaoverseas_user');
         localStorage.removeItem('eaoverseas_refresh_token');
+        localStorage.removeItem('token');
     };
 
     const requireAuth = (callback: () => void) => {

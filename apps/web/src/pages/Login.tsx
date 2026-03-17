@@ -60,16 +60,15 @@ const Login = () => {
 
     const performLogin = async (loginEmail: string, loginPass: string, role: string) => {
         setError('');
-        const allowedRoles = ['Student', 'University', 'Counsellor', 'Vendors', 'Chief Counsel'];
-        if (!allowedRoles.includes(role)) {
-            return;
-        }
-
         try {
             const user = await login(loginEmail, loginPass);
-            if (user.role === 'University' || role === 'University') {
+            const userRole = user.role || role;
+
+            if (userRole === 'University') {
                 navigate('/university/dashboard');
-            } else if (user.role === 'Counsellor' || role === 'Counsellor') {
+            } else if (userRole === 'Admin' || userRole === 'Counsellor') {
+                navigate('/Superadmin');
+            } else if (userRole === 'counsellor-dashboard' || role === 'Counsellor') {
                 navigate('/counsellor-dashboard');
             } else {
                 if (location.state?.verified) {

@@ -6,7 +6,7 @@ import LoginModal from '@/features/auth/LoginModal';
 
 import { universitiesData } from '@/data/universities';
 
-const UniversityDirectory = () => {
+const UniversityDirectory = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     const navigate = useNavigate();
     const { executeAction, isLoginModalOpen, closeLoginModal } = useAuthAction();
     const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +51,7 @@ const UniversityDirectory = () => {
 
     const handleViewDetails = (id: number) => {
         executeAction(() => {
-            navigate(`/consultant/university-details/${id}`);
+            navigate(isEmbedded ? `/Superadmin/counsellor-portal/university-details/${id}` : `/consultant/university-details/${id}`);
         });
     };
 

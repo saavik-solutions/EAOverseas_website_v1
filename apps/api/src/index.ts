@@ -29,6 +29,9 @@ import feedRoutes from './routes/feed.routes';
 import scraperRoutes from './routes/scraper.routes';
 import chatRoutes from './routes/chat.routes';
 import authRoutes from './routes/auth.routes';
+import universityRoutes from './routes/university.routes';
+import applicationRoutes from './routes/application.routes';
+import inquiryRoutes from './routes/inquiry.routes';
 
 // ── Security Middleware ──────────────────────────────────────────────────────
 app.use(helmet());
@@ -63,12 +66,30 @@ app.use((req, res, next) => {
 
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/auth', authRoutes);
+app.use('/api/universities', universityRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/scraper', scraperRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/inquiries', inquiryRoutes);
 
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'API is running' });
+});
+
+// ── Error Handling Middleware ────────────────────────────────────────────────
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    logger.error('Unhandled Exception', {
+        error: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+        url: req.url,
+        method: req.method
+    });
+
+    res.status(err.status || 500).json({
+        error: err.message || 'Internal Server Error',
+        success: false
+    });
 });
 
 // ── Socket.io Logic ──────────────────────────────────────────────────────────

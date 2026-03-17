@@ -17,6 +17,12 @@ export interface IUniversity extends Document {
     website: string;
     country: string;
     city: string;
+    description?: string;
+    universityType?: 'Public' | 'Private' | 'Research' | 'Technical';
+    establishedYear?: number;
+    totalStudents?: number;
+    campusSize?: string;
+    globalRanking?: string;
     courses: ICourse[];
     fees: IFees;
     scholarships: string[];
@@ -27,6 +33,14 @@ export interface IUniversity extends Document {
     placementStatistics?: string;
     logoUrl?: string;
     scraped_at: Date;
+    visitCount: number;
+    visitHistory: { date: string; count: number }[];
+    socialLinks?: {
+        linkedin?: string;
+        twitter?: string;
+        facebook?: string;
+        instagram?: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -38,6 +52,12 @@ const UniversitySchema: Schema = new Schema(
         website: { type: String, required: true },
         country: { type: String, required: true },
         city: { type: String },
+        description: { type: String },
+        universityType: { type: String, enum: ['Public', 'Private', 'Research', 'Technical'] },
+        establishedYear: { type: Number },
+        totalStudents: { type: Number },
+        campusSize: { type: String },
+        globalRanking: { type: String },
         courses: [
             {
                 degree: { type: String },
@@ -56,6 +76,19 @@ const UniversitySchema: Schema = new Schema(
         admissionRequirements: { type: String },
         placementStatistics: { type: String },
         logoUrl: { type: String },
+        visitCount: { type: Number, default: 0 },
+        visitHistory: [
+            {
+                date: { type: String },
+                count: { type: Number }
+            }
+        ],
+        socialLinks: {
+            linkedin: { type: String },
+            twitter: { type: String },
+            facebook: { type: String },
+            instagram: { type: String }
+        },
         scraped_at: { type: Date, default: Date.now }
     },
     { timestamps: true }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getFeed, createPost, getTrendingTopics, toggleLikePost, addComment, editComment, translateFeedItem } from '../controllers/feed.controller';
+import { getFeed, getPostById, createPost, getTrendingTopics, toggleLikePost, addComment, editComment, translateFeedItem } from '../controllers/feed.controller';
 import { User } from '../models/User';
 import { verifyJWT } from '../middleware/verifyJWT';
 
@@ -8,6 +8,7 @@ const router = Router();
 router.get('/', getFeed);
 router.post('/', verifyJWT, createPost);
 router.get('/trending', getTrendingTopics);
+router.get('/:postId', getPostById);
 router.post('/:postId/toggle-like', verifyJWT, toggleLikePost);
 router.post('/:postId/comment', verifyJWT, addComment);
 router.put('/comment/:commentId', verifyJWT, editComment);

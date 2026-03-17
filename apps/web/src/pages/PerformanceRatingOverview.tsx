@@ -9,9 +9,10 @@ interface PerformanceRatingOverviewProps {
         image: string;
     } | null;
     onBack?: () => void;
+    isEmbedded?: boolean;
 }
 
-const PerformanceRatingOverview: React.FC<PerformanceRatingOverviewProps> = ({ selectedCounsellor, onBack }) => {
+const PerformanceRatingOverview: React.FC<PerformanceRatingOverviewProps> = ({ selectedCounsellor, onBack, isEmbedded = false }) => {
     const [activeFilter, setActiveFilter] = useState('7d');
 
     const dataByFilter = {

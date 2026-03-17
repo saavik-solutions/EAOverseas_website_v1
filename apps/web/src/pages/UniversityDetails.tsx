@@ -6,7 +6,7 @@ import { useAuthAction } from '@/shared/hooks/useAuthAction';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import LoginModal from '@/features/auth/LoginModal';
 
-const UniversityDetails = () => {
+const UniversityDetails = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     const { id } = useParams();
     const university = universitiesData.find(u => u.id === Number(id));
     const { executeAction, isLoginModalOpen, closeLoginModal } = useAuthAction();
@@ -18,7 +18,7 @@ const UniversityDetails = () => {
                 <PageHeader title="University Not Found" />
                 <div className="flex-1 flex flex-col items-center justify-center p-10">
                     <h2 className="text-3xl font-bold text-gray-900 mb-4">University details not available.</h2>
-                    <Link to="/consultant/university-directory" className="text-blue-600 font-bold hover:underline">Back to Directory</Link>
+                    <Link to={isEmbedded ? "/Superadmin/counsellor-portal/university-directory" : "/consultant/university-directory"} className="text-blue-600 font-bold hover:underline">Back to Directory</Link>
                 </div>
             </div>
         );
@@ -103,7 +103,7 @@ const UniversityDetails = () => {
             {/* Breadcrumb Header */}
             <PageHeader
                 breadcrumbs={[
-                    { label: 'University Directory', link: '/consultant/university-directory' },
+                    { label: 'University Directory', link: isEmbedded ? '/Superadmin/counsellor-portal/university-directory' : '/consultant/university-directory' },
                     { label: university.name }
                 ]}
             />

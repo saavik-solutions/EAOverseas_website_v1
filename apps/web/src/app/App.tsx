@@ -10,6 +10,7 @@ import AboutUs from '@/pages/AboutUs';
 import Team from '@/pages/Team';
 import ExpertProfile from '@/pages/ExpertProfile';
 import Countries from '@/pages/Countries';
+import ContactUs from '@/pages/ContactUs';
 import AllDestinations from '@/pages/AllDestinations';
 import Blogs from '@/pages/Blogs';
 import BlogDetails from '@/pages/BlogDetails';
@@ -84,20 +85,20 @@ import CounsellorProfile from '@/pages/CounsellorProfile';
 import CounsellingChat from '@/pages/CounsellingChat';
 import PerformanceRatingOverview from '@/pages/PerformanceRatingOverview';
 import AssignedStudents from '@/pages/AssignedStudents';
-import Superadmin from '@/pages/Superadmin';
-import SuperAdminUniversityManagement from '@/pages/SuperAdminUniversityManagement';
 import SuperAdminUniversityProfile from '@/pages/SuperAdminUniversityProfile';
 import ActivePartnersPage from '@/pages/ActivePartnersPage';
-import TopPerformersPage from '@/pages/TopPerformersPage';
-import ApplicationsAnalyticsPage from '@/pages/ApplicationsAnalyticsPage';
 import AllApplicationsPage from '@/pages/AllApplicationsPage';
-import SuperAdminConsultantManagement from '@/pages/SuperAdminConsultantManagement';
-import UniversityDashboard from '@/pages/UniversityDashboard';
+import SuperAdminUserManagement from '@/pages/SuperAdminUserManagement';
+import SuperAdminInquiries from '@/pages/SuperAdminInquiries';
+
+const SuperAdminUniversityManagement = React.lazy(() => import('@/pages/SuperAdminUniversityManagement'));
+const SuperAdminPostFeedDashboard = React.lazy(() => import('@/pages/SuperAdminPostFeedDashboard'));
+const SuperAdminPostDetails = React.lazy(() => import('@/pages/SuperAdminPostDetails'));
+const SuperAdminNewPost = React.lazy(() => import('@/pages/SuperAdminNewPost'));
+const SuperAdminStrategicDashboard = React.lazy(() => import('@/pages/SuperAdminStrategicDashboard'));
 import PostCenter from '@/pages/PostCenter';
-import UniversityManagementProfile from '@/pages/UniversityManagementProfile';
 import UniversityScholarship from '@/pages/UniversityScholarship';
 import ScholarshipAnalytics from '@/pages/ScholarshipAnalytics';
-import UniversityPrograms from '@/pages/UniversityPrograms';
 import Scholarships from '@/pages/Scholarships';
 import ScholarshipDetails from '@/pages/ScholarshipDetails';
 import MyScholarshipApplications from '@/pages/MyScholarshipApplications';
@@ -150,6 +151,14 @@ const HomeRoute = () => {
     return <LandingPage />;
 };
 
+const SuperAdminIndex = () => {
+    const { user } = useAuth();
+    if (user?.role === 'Counsellor') {
+        return <Navigate to="counsellor-portal/dashboard" replace />;
+    }
+    return <SuperAdminStrategicDashboard />;
+};
+
 function App() {
     return (
         <NotificationProvider>
@@ -172,6 +181,7 @@ function App() {
                                         <Route path="/expert-profile/:expertId" element={<ExpertProfile />} />
                                         <Route path="/countries" element={<Countries />} />
                                         <Route path="/country/:countryCode" element={<CountryDetails />} />
+                                        <Route path="/contact" element={<ContactUs />} />
                                         <Route path="/all-destinations" element={<AllDestinations />} />
                                         <Route path="/blogs" element={<Blogs />} />
                                         <Route path="/blogs/:id" element={<BlogDetails />} />
@@ -217,10 +227,6 @@ function App() {
                                             <Route path="saved-courses" element={<SavedCourses />} />
                                             <Route path="saved-accommodations" element={<SavedAccommodations />} />
                                             <Route path="saved-posts" element={<SavedPosts />} />
-                                            <Route path="profile/:username" element={<UserProfile />} />
-                                            <Route path="institution/:name" element={<UniversityProfile />} />
-                                            <Route path="consultant" element={<Consultant />} />
-                                            <Route path="consultation-waiting-room" element={<ConsultationWaitingRoom />} />
                                             <Route path="visas" element={<VisaPrep />} />
                                             <Route path="loans" element={<LoanRequirements />} />
                                             <Route path="loan-eligibility" element={<LoanEligibility />} />
@@ -297,39 +303,54 @@ function App() {
                                             <Route path="/counsellor-student-profile" element={<MyProfile />} />
                                         </Route>
 
-                                        <Route path="/Superadmin" element={<SuperAdminLayout title="Super Admin" />}>
-                                            <Route index element={<Superadmin />} />
+                                        <Route path="/Superadmin" element={<SuperAdminLayout title="Super Admin Dashboard" />}>
+                                            <Route index element={<SuperAdminIndex />} />
                                             <Route path="universities" element={<SuperAdminUniversityManagement />} />
-                                            <Route path="consultants" element={<SuperAdminConsultantManagement />} />
                                             <Route path="counsellors" element={<SuperAdminAvailableCounsellors />} />
                                             <Route path="active-today" element={<SuperAdminActiveTodayCounsellors />} />
                                             <Route path="scraper" element={<UniversityScraper />} />
                                             <Route path="active-partners" element={<ActivePartnersPage />} />
-                                            <Route path="top-performers" element={<TopPerformersPage />} />
-                                            <Route path="applications" element={<ApplicationsAnalyticsPage />} />
                                             <Route path="applications/all" element={<AllApplicationsPage />} />
                                             <Route path="university/:id" element={<SuperAdminUniversityProfile />} />
-                                            <Route path="students" element={<TopPerformersPage />} />
-                                            <Route path="revenue" element={<ApplicationsAnalyticsPage />} />
+                                            <Route path="users" element={<SuperAdminUserManagement />} />
+                                            <Route path="inquiries" element={<SuperAdminInquiries />} />
+
+
 
                                             {/* Nested University Portal routes */}
                                             <Route path="university-portal">
-                                                <Route path="dashboard" element={<UniversityDashboard isEmbedded={true} />} />
+                                                <Route path="posts-feed" element={<SuperAdminPostFeedDashboard />} />
+                                                <Route path="posts-feed/new" element={<SuperAdminNewPost />} />
+                                                <Route path="posts-feed/:postId" element={<SuperAdminPostDetails />} />
                                                 <Route path="scholarships" element={<UniversityScholarship isEmbedded={true} />} />
                                                 <Route path="post-center" element={<PostCenter isEmbedded={true} />} />
-                                                <Route path="programs" element={<UniversityPrograms isEmbedded={true} />} />
-                                                <Route path="profile" element={<UniversityManagementProfile isEmbedded={true} />} />
+                                                <Route path="programs" element={<Navigate to="../posts-feed" replace />} />
+                                            </Route>
+
+                                            {/* Nested Counsellor Portal routes */}
+                                            <Route path="counsellor-portal">
+                                                <Route path="dashboard" element={<ConsultantDashboard isEmbedded={true} />} />
+                                                <Route path="students" element={<ConsultantStudents isEmbedded={true} />} />
+                                                <Route path="applications" element={<ConsultantApplications isEmbedded={true} />} />
+                                                <Route path="university-directory" element={<UniversityDirectory isEmbedded={true} />} />
+                                                <Route path="university-details/:id" element={<UniversityDetails isEmbedded={true} />} />
+                                                <Route path="chat" element={<CounsellingChat isEmbedded={true} />} />
+                                                <Route path="schedule" element={<ConsultantSchedule isEmbedded={true} />} />
+                                                <Route path="tasks" element={<ConsultantTasks isEmbedded={true} />} />
+                                                <Route path="profile" element={<CounsellorProfile isEmbedded={true} />} />
+                                                <Route path="performance" element={<PerformanceRatingOverview isEmbedded={true} />} />
+                                                <Route path="assigned-students" element={<AssignedStudents isEmbedded={true} />} />
+                                                <Route path="student-profile" element={<MyProfile isEmbedded={true} />} />
                                             </Route>
                                         </Route>
                                         <Route path="/superadmin/*" element={<Navigate to="/Superadmin" replace />} />
-                                        <Route path="/university/dashboard" element={<ProtectedRoute requiredRoles={['university']}><UniversityDashboard /></ProtectedRoute>} />
+                                        <Route path="/university/dashboard" element={<Navigate to="/university/applications" replace />} />
                                         <Route path="/university/applications" element={<UniversityApplications />} />
                                         <Route path="/university/published-posts" element={<UniversityPublishedPosts />} />
                                         <Route path="/university/management" element={<UniversityScholarship />} />
                                         <Route path="/university/post-center" element={<PostCenter />} />
                                         <Route path="/university/scholarship-analytics" element={<ScholarshipAnalytics />} />
-                                        <Route path="/university/programs" element={<UniversityPrograms />} />
-                                        <Route path="/university/profile" element={<UniversityManagementProfile />} />
+                                        <Route path="/university/programs" element={<Navigate to="/Superadmin/university-portal/posts-feed" replace />} />
                                     </Routes>
                                 </BrowserRouter>
                             </ApplicationsProvider>

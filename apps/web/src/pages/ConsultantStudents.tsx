@@ -14,7 +14,7 @@ interface Student {
     color: string;
 }
 
-const ConsultantStudents = () => {
+const ConsultantStudents = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = React.useState('');
     // Load completed students from localStorage on mount
@@ -273,7 +273,7 @@ const ConsultantStudents = () => {
                                                 </td>
                                                 <td className="px-2 py-3 md:px-6 md:py-4 text-right">
                                                     <button
-                                                        onClick={() => navigate('/counsellor-student-profile?readonly=true')}
+                                                        onClick={() => navigate(isEmbedded ? '/Superadmin/counsellor-portal/student-profile?readonly=true' : '/counsellor-student-profile?readonly=true')}
                                                         className="text-blue-600 text-[11px] md:text-sm font-bold hover:bg-blue-50 px-2 md:px-4 py-1 md:py-2 rounded-lg transition-colors whitespace-nowrap"
                                                     >
                                                         Profile

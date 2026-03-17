@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { postsData } from '@workspace/common';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { feedService } from '@/services/feedService';
 
-// Define the Post type based on the structure used in mockFeedData and PostCenter
 export interface Post {
     id: string;
     label: string;
@@ -16,187 +15,92 @@ export interface Post {
     applyLink?: string;
     grid: { label: string; value: string; alert?: boolean; color?: string }[];
     about: string;
-    // Additional fields for PostCenter and Feed compatibility
     category?: string;
     status?: 'Published' | 'Draft' | 'Archived';
     isPinned?: boolean;
-    image?: string;
-    expiry?: string;
-    hashtags?: string;
-    duration?: string;
-    startDate?: string;
-    funding?: string;
-    openDate?: string;
-    requiredTest?: string;
-    policyCategory?: string;
-    effectiveDate?: string;
-    eventType?: string;
-    eventDate?: string;
-    eventDuration?: string;
-    eventHost?: string;
-    eventLink?: string;
-    eventVenue?: string;
-    eligibility?: string[];
-    benefits?: { icon: string; title: string; desc: string; text: string; bg: string }[];
+    universityId?: string;
 }
 
 interface PostsContextType {
     posts: Post[];
-    addPost: (post: Post) => void;
-    updatePost: (id: string | number, updatedPost: Post) => void;
-    deletePost: (id: string | number) => void;
-    clearAllPosts: () => void;
+    loading: boolean;
+    error: string | null;
+    refreshPosts: () => Promise<void>;
+    addPost: (post: any) => Promise<void>;
+    deletePost: (id: string) => Promise<void>;
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    // Initialize from localStorage or empty array with error handling
-    const [posts, setPosts] = React.useState<Post[]>(() => {
-        try {
-            const savedPosts = localStorage.getItem('university_posts');
-            if (!savedPosts) return Object.values(postsData) as Post[];
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-            const parsedSaved = JSON.parse(savedPosts);
-            const migratedSaved = parsedSaved.map((post: any) => {
-                const updatedPost = { ...post };
-                updatedPost.grid = post.grid?.map((item: any) =>
-                    item.label === 'Term Starts' ? { label: 'Course Level', value: 'Postgraduate' } : item
-                );
-                if (!updatedPost.applyLink || updatedPost.applyLink === '#') {
-                    if (updatedPost.category === 'Scholarship') updatedPost.applyLink = '/application';
-                    else if (updatedPost.category === 'Admissions') updatedPost.applyLink = '/colleges';
-                }
-                return updatedPost;
-            });
-
-            const mockPosts = Object.values(postsData) as Post[];
-            const savedIds = new Set(migratedSaved.map((p: any) => p.id));
-            const uniqueMockPosts = mockPosts.filter(p => !savedIds.has(p.id));
-            return [...migratedSaved, ...uniqueMockPosts];
-        } catch (err) {
-            console.error('Error loading posts:', err);
-            return Object.values(postsData) as Post[];
-        }
+    const mapBackendToPost = (p: any): Post => ({
+        id: p._id,
+        label: p.category || 'Article',
+        labelColor: p.category === 'Scholarship' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+            p.category === 'Program' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-blue-50 text-blue-700 border-blue-100',
+        banner: p.banner || (p.mediaUrls && p.mediaUrls[0]) || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop',
+        logo: p.universityLogo || 'https://via.placeholder.com/100',
+        title: p.title,
+        institution: p.universityName || 'Global Update',
+        location: p.location || 'Global',
+        tags: p.tags || [],
+        about: p.content,
+        category: p.category,
+        status: 'Published',
+        universityId: p.universityId,
+        grid: [
+            ...(p.category === 'Program' ? [
+                { label: 'Tuition', value: p.tuitionFee || 'Contact Uni' },
+                { label: 'Duration', value: p.programDuration || 'N/A' },
+                { label: 'Intakes', value: p.intakes || 'Fall/Spring' }
+            ] : []),
+            ...(p.category === 'Scholarship' ? [
+                { label: 'Funding', value: p.funding || 'Partial' },
+                { label: 'Deadline', value: p.expiry || 'Open', alert: true }
+            ] : []),
+            ...(p.category !== 'Program' && p.category !== 'Scholarship' ? [
+                { label: 'Type', value: p.category || 'Information' },
+                { label: 'Updated', value: new Date(p.updatedAt).toLocaleDateString() }
+            ] : [])
+        ]
     });
 
-    const isInitialMount = React.useRef(true);
-    const channelRef = React.useRef<BroadcastChannel | null>(null);
-
-    // Synchronous persistence helper
-    const persistPosts = (updatedPosts: Post[]) => {
+    const refreshPosts = async () => {
+        setLoading(true);
         try {
-            const data = JSON.stringify(updatedPosts);
-            // Defensive size check (roughly 4.5MB limit)
-            if (data.length > 4.5 * 1024 * 1024) {
-                const msg = 'Post data (likely images) is too large for storage. Try a smaller image.';
-                console.warn(msg);
-                alert(msg);
-                return false;
-            }
-            localStorage.setItem('university_posts', data);
-
-            // Broadcast to other tabs immediately
-            if (channelRef.current) {
-                channelRef.current.postMessage({ type: 'SYNC_POSTS', payload: updatedPosts });
-            }
-            return true;
+            const data = await feedService.getAll();
+            const mapped = data.map(mapBackendToPost);
+            setPosts(mapped);
+            setError(null);
         } catch (err) {
-            console.error('Failed to persist posts:', err);
-            if (err instanceof Error && err.name === 'QuotaExceededError') {
-                alert('Storage full! Please use the "Clear All" button in the Post Center or "Reset Feed" in SuperAdmin to free up space.');
-            }
-            return false;
+            console.error('Failed to sync feed:', err);
+            setError('Global feed is currently unavailable.');
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Initialize BroadcastChannel
-    React.useEffect(() => {
-        const channel = new BroadcastChannel('eaoverseas_posts_channel');
-        channelRef.current = channel;
-
-        channel.onmessage = (event) => {
-            if (event.data?.type === 'SYNC_POSTS') {
-                setPosts(prev => {
-                    const newValueString = JSON.stringify(event.data.payload);
-                    if (JSON.stringify(prev) === newValueString) return prev;
-                    return event.data.payload;
-                });
-            }
-        };
-
-        return () => {
-            channel.close();
-        };
+    useEffect(() => {
+        refreshPosts();
     }, []);
 
-    // Backup persistence for background updates
-    React.useEffect(() => {
-        if (isInitialMount.current) {
-            isInitialMount.current = false;
-            return;
-        }
-        localStorage.setItem('university_posts', JSON.stringify(posts));
-    }, [posts]);
-
-    // Listen for storage events (legacy backup)
-    React.useEffect(() => {
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'university_posts' && e.newValue) {
-                try {
-                    const updatedPosts = JSON.parse(e.newValue);
-                    setPosts(prev => {
-                        if (JSON.stringify(prev) === e.newValue) return prev;
-                        return updatedPosts;
-                    });
-                } catch (err) {
-                    console.error('Error parsing cross-tab storage update:', err);
-                }
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
-
-    const addPost = (post: Post) => {
-        setPosts(prev => {
-            const next = [post, ...prev];
-            // Schedule persistence outside of the pure updater function
-            setTimeout(() => persistPosts(next), 0);
-            return next;
-        });
+    const addPost = async (postData: any) => {
+        await feedService.create(postData);
+        await refreshPosts();
     };
 
-    const updatePost = (id: string | number, updatedPost: Post) => {
-        setPosts(prev => {
-            const next = prev.map(post => post.id.toString() === id.toString() ? updatedPost : post);
-            setTimeout(() => persistPosts(next), 0);
-            return next;
-        });
-    };
-
-    const deletePost = (id: string | number) => {
-        setPosts(prev => {
-            const next = prev.filter(post => post.id.toString() !== id.toString());
-            setTimeout(() => persistPosts(next), 0);
-            return next;
-        });
-    };
-
-    const clearAllPosts = () => {
-        if (window.confirm('This will delete all university posts from this browser. Are you sure?')) {
-            const resetData = Object.values(postsData) as Post[];
-            setPosts(resetData);
-            localStorage.removeItem('university_posts');
-            if (channelRef.current) {
-                channelRef.current.postMessage({ type: 'SYNC_POSTS', payload: resetData });
-            }
-        }
+    const deletePost = async (id: string) => {
+        // Implementation for delete would go here if service supported it
+        // For now we just refresh to show the source of truth
+        await refreshPosts();
     };
 
     return (
-        <PostsContext.Provider value={{ posts, addPost, updatePost, deletePost, clearAllPosts }}>
+        <PostsContext.Provider value={{ posts, loading, error, refreshPosts, addPost, deletePost }}>
             {children}
         </PostsContext.Provider>
     );

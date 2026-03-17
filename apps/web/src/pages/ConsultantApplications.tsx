@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
 import { useApplications, Application } from '@/shared/contexts/ApplicationsContext';
 
-const ConsultantApplications = () => {
+const ConsultantApplications = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     const navigate = useNavigate();
     const { applications, updateApplicationStatus } = useApplications();
     const [activeTab, setActiveTab] = useState<'All' | 'Program' | 'Scholarship' | 'University'>('All');

@@ -26,14 +26,14 @@ const Navbar = () => {
                 </div>
 
                 {/* Desktop Links */}
-                {['/countries', '/about', '/blogs'].map((path) => (
+                {['/countries', '/about', '/blogs', '/contact'].map((path) => (
                     <div
                         key={path}
                         onClick={() => navigate(path)}
                         className="relative cursor-pointer group"
                     >
                         <span className={`text-base font-medium transition-colors ${isActive(path) ? 'text-blue-600' : 'text-gray-900 hover:text-blue-600'}`}>
-                            {path === '/countries' ? 'Countries' : path === '/about' ? 'About Us' : 'Blogs'}
+                            {path === '/countries' ? 'Countries' : path === '/about' ? 'About Us' : path === '/blogs' ? 'Blogs' : 'Contact'}
                         </span>
                         {isActive(path) && (
                             <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-blue-600 rounded-full transition-all duration-300 layout-id-active" />
@@ -108,14 +108,14 @@ const Navbar = () => {
                     }`}
             >
                 <div className="flex flex-col gap-4 px-6 py-6 items-center">
-                    {['/countries', '/about', '/blogs'].map((path) => (
+                    {['/countries', '/about', '/blogs', '/contact'].map((path) => (
                         <div
                             key={path}
                             onClick={() => handleNavigation(path)}
                             className={`text-lg font-medium transition-colors cursor-pointer w-full text-center py-2 border-b border-gray-50 last:border-0 ${isActive(path) ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'
                                 }`}
                         >
-                            {path === '/countries' ? 'Countries' : path === '/about' ? 'About Us' : 'Blogs'}
+                            {path === '/countries' ? 'Countries' : path === '/about' ? 'About Us' : path === '/blogs' ? 'Blogs' : 'Contact'}
                         </div>
                     ))}
                     {user && (

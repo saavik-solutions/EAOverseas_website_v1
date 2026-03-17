@@ -24,7 +24,7 @@ const BASE_STUDENTS = Array.from({ length: 24 }, (_, i) => ({
     color: ['blue', 'orange', 'purple', 'green'][i % 4]
 }));
 
-const AssignedStudents = () => {
+const AssignedStudents = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     const [students, setStudents] = useState(BASE_STUDENTS);
 
     useEffect(() => {

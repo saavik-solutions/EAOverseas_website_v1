@@ -10,11 +10,15 @@ import { AuthRequest } from '../middleware/verifyJWT';
 // 1. Algorithmic Relevance Feed
 export const getFeed = async (req: Request, res: Response) => {
     try {
-        const { topic, page = 1, limit = 10, userId, search } = req.query;
+        const { topic, page = 1, limit = 10, userId, search, universityId } = req.query;
 
         const query: any = {};
         if (topic && topic !== 'All Topics' && topic !== 'Algorithmic Feed' && topic !== 'Personalized') {
             query.tags = topic;
+        }
+
+        if (universityId) {
+            query.universityId = universityId;
         }
 
         if (search) {
@@ -125,9 +129,54 @@ export const getFeed = async (req: Request, res: Response) => {
     }
 };
 
+// 1.1. Get Post by ID
+export const getPostById = async (req: Request, res: Response) => {
+    try {
+        const { postId } = req.params;
+        const post = await Post.findById(postId)
+            .populate('authorId', 'name avatarUrl role badges trustScore')
+            .lean();
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Fetch comments for this post
+        const comments = await Comment.find({ postId })
+            .populate('authorId', 'name avatarUrl')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        const formattedComments = comments.map(c => ({
+            _id: c._id,
+            author: (c.authorId as any)?.name || 'Anonymous',
+            avatar: (c.authorId as any)?.avatarUrl || 'https://i.pravatar.cc/150?u=100',
+            text: c.content,
+            time: c.createdAt,
+            isEdited: c.isEdited || false,
+            replyTo: c.replyTo || null,
+        }));
+
+        res.status(200).json({
+            post: {
+                ...post,
+                comments: formattedComments,
+                commentsCount: post.commentCount
+            }
+        });
+    } catch (error: any) {
+        console.error("error in getPostById:", error);
+        res.status(500).json({ error: 'Failed to fetch post details' });
+    }
+};
+
 export const createPost = async (req: AuthRequest, res: Response) => {
     try {
-        const { title, content, tags } = req.body;
+        const {
+            title, content, category, tags,
+            universityId, universityName, universityLogo, location,
+            tuitionFee, programDuration, intakes, academicLevel
+        } = req.body;
         const authorId = req.user?.user_id;
 
         if (!authorId) {
@@ -158,7 +207,16 @@ export const createPost = async (req: AuthRequest, res: Response) => {
             authorId: user._id,
             title,
             content,
+            category: category || 'Article',
             tags: tags || ['General'],
+            universityId: universityId === 'all' ? undefined : universityId,
+            universityName,
+            universityLogo,
+            location: location || 'Global',
+            tuitionFee,
+            programDuration,
+            intakes,
+            academicLevel,
             score: 1,
             semanticEmbedding: embedding
         });

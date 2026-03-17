@@ -4,16 +4,26 @@ export interface IPost extends Document {
     authorId: mongoose.Schema.Types.ObjectId;
     title: string;
     content: string;
+    category: string; // Article, Scholarship, Announcement, Event, Guide, Program
+    universityId?: mongoose.Schema.Types.ObjectId;
+    universityName?: string;
+    universityLogo?: string;
+    location?: string;
     mediaUrls: string[];
     upvotes: mongoose.Schema.Types.ObjectId[];
     downvotes: mongoose.Schema.Types.ObjectId[];
-    score: number; // calculated for algorithmic feed
+    score: number;
     viewCount: number;
     commentCount: number;
-    tags: string[]; // Zero-shot classification tags (e.g. Visa, Finances)
-    semanticEmbedding?: number[]; // For semantic search
-    isFlagged: boolean; // For toxicity detection
-    tldrSummary?: string; // LLM thread summary
+    tags: string[];
+    semanticEmbedding?: number[];
+    isFlagged: boolean;
+    tldrSummary?: string;
+    // Program Specifics
+    tuitionFee?: string;
+    programDuration?: string;
+    intakes?: string;
+    academicLevel?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -23,6 +33,11 @@ const PostSchema: Schema = new Schema(
         authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         title: { type: String, required: true },
         content: { type: String, required: true },
+        category: { type: String, default: 'Article' },
+        universityId: { type: Schema.Types.ObjectId, ref: 'University' },
+        universityName: { type: String },
+        universityLogo: { type: String },
+        location: { type: String, default: 'Global' },
         mediaUrls: [{ type: String }],
         upvotes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
         downvotes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
@@ -33,6 +48,11 @@ const PostSchema: Schema = new Schema(
         semanticEmbedding: [{ type: Number }], // For vector index
         isFlagged: { type: Boolean, default: false },
         tldrSummary: { type: String },
+        // Program Specifics
+        tuitionFee: { type: String },
+        programDuration: { type: String },
+        intakes: { type: String },
+        academicLevel: { type: String },
     },
     { timestamps: true }
 );

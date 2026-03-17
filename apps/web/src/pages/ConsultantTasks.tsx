@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 
-const ConsultantTasks = () => {
+const ConsultantTasks = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     // State
     const [activeTab, setActiveTab] = useState('pending');
     const [filters, setFilters] = useState({

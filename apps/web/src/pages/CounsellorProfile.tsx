@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '@/components/layout/PageHeader';
 
-const CounsellorProfile = () => {
+const CounsellorProfile = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     return (
         <div className="flex flex-col flex-1 h-full overflow-hidden bg-[#f5f7f8]">
             <PageHeader title="Counsellor Profile" />
@@ -34,7 +34,7 @@ const CounsellorProfile = () => {
                                 </p>
 
                                 {/* 5-Star Rating UI */}
-                                <Link to="/counsellor-performance" className="flex items-center gap-2 mt-1.5 mb-1 animate-fade-in hover:opacity-80 transition-opacity cursor-pointer">
+                                <Link to={isEmbedded ? "/Superadmin/counsellor-portal/performance" : "/counsellor-performance"} className="flex items-center gap-2 mt-1.5 mb-1 animate-fade-in hover:opacity-80 transition-opacity cursor-pointer">
                                     <div className="flex text-yellow-400">
                                         <span className="material-symbols-outlined icon-filled !text-[18px]">star</span>
                                         <span className="material-symbols-outlined icon-filled !text-[18px]">star</span>
@@ -56,7 +56,7 @@ const CounsellorProfile = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-4 w-full lg:w-auto mt-2 lg:mt-0">
-                            <Link to="/counsellor-performance" className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]">
+                            <Link to={isEmbedded ? "/Superadmin/counsellor-portal/performance" : "/counsellor-performance"} className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md shadow-blue-600/20 active:scale-[0.98]">
                                 <span className="material-symbols-outlined !text-[20px]">star</span>
                                 <span>Check Rating</span>
                             </Link>

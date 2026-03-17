@@ -11,39 +11,68 @@ interface SuperAdminLayoutProps {
 const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    // RBAC: Determine the active user role (defaulting to Admin if undefined for safety)
+    const userRole = user?.role || 'Admin';
+
     const menuItems = [
-        { name: 'Overview', icon: 'dashboard', path: '/Superadmin' },
-        { name: 'Universities', icon: 'account_balance', path: '/Superadmin/universities' },
-        { name: 'Consultants', icon: 'support_agent', path: '/Superadmin/consultants' },
-        { name: 'Students', icon: 'group', path: '/Superadmin/students' },
-        { name: 'Revenue', icon: 'payments', path: '/Superadmin/revenue' },
+        { name: 'Strategic Dashboard', icon: 'dashboard', path: '/Superadmin', allowedRoles: ['Admin'] },
+        { name: 'Platform Inquiries', icon: 'contact_support', path: '/Superadmin/inquiries', allowedRoles: ['Admin'] },
+        { name: 'Operational Hub', icon: 'analytics', path: '/Superadmin/counsellor-portal/dashboard', allowedRoles: ['Admin', 'Counsellor'] },
+        { name: 'User Management', icon: 'manage_accounts', path: '/Superadmin/users', allowedRoles: ['Admin'] },
         {
             name: 'University Portal',
             icon: 'account_balance',
             isDropdown: true,
+            allowedRoles: ['Admin'],
             children: [
-                { name: 'Overview', icon: 'dashboard', path: '/Superadmin/university-portal/dashboard' },
-                { name: 'Scholarships', icon: 'settings_suggest', path: '/Superadmin/university-portal/scholarships' },
-                { name: 'Post Center', icon: 'post_add', path: '/Superadmin/university-portal/post-center' },
-                { name: 'Programs', icon: 'school', path: '/Superadmin/university-portal/programs' },
-                { name: 'Profile', icon: 'person', path: '/Superadmin/university-portal/profile' },
+                { name: 'Universities', icon: 'account_balance', path: '/Superadmin/universities' },
+                { name: 'Posts & Feed', icon: 'feed', path: '/Superadmin/university-portal/posts-feed' },
+            ]
+        },
+        {
+            name: 'Counsellor Portal',
+            icon: 'support_agent',
+            isDropdown: true,
+            allowedRoles: ['Admin', 'Counsellor'],
+            children: [
+                { name: 'Overview', icon: 'dashboard', path: '/Superadmin/counsellor-portal/dashboard' },
+                { name: 'Students', icon: 'group', path: '/Superadmin/counsellor-portal/students' },
+                { name: 'Applications', icon: 'folder', path: '/Superadmin/counsellor-portal/applications' },
+                { name: 'University Directory', icon: 'account_balance', path: '/Superadmin/counsellor-portal/university-directory' },
+                { name: 'Counselling Chat', icon: 'chat', path: '/Superadmin/counsellor-portal/chat' },
+                { name: 'Schedule', icon: 'calendar_month', path: '/Superadmin/counsellor-portal/schedule' },
             ]
         },
         {
             name: 'Data Intelligence',
             icon: 'analytics',
             isDropdown: true,
+            allowedRoles: ['Admin'],
             children: [
                 { name: 'University Scraper', icon: 'data_exploration', path: '/Superadmin/scraper' }
             ]
         }
-    ];
+    ].filter(item => item.allowedRoles.includes(userRole));
 
     const [isDataIntelOpen, setIsDataIntelOpen] = useState(location.pathname.startsWith('/Superadmin/scraper'));
     const [isUniPortalOpen, setIsUniPortalOpen] = useState(location.pathname.startsWith('/Superadmin/university-portal'));
+    const [isCounsellorPortalOpen, setIsCounsellorPortalOpen] = useState(location.pathname.startsWith('/Superadmin/counsellor-portal'));
+
+    const handleDropdownClick = (itemName: string) => {
+        if (itemName === 'Data Intelligence') setIsDataIntelOpen(!isDataIntelOpen);
+        if (itemName === 'University Portal') setIsUniPortalOpen(!isUniPortalOpen);
+        if (itemName === 'Counsellor Portal') setIsCounsellorPortalOpen(!isCounsellorPortalOpen);
+    };
+
+    const isDropdownOpen = (itemName: string) => {
+        if (itemName === 'Data Intelligence') return isDataIntelOpen;
+        if (itemName === 'University Portal') return isUniPortalOpen;
+        if (itemName === 'Counsellor Portal') return isCounsellorPortalOpen;
+        return false;
+    };
 
     return (
         <div className="flex h-screen bg-[#f8f6f6] flex-col lg:flex-row">
@@ -90,11 +119,8 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
                             {item.isDropdown ? (
                                 <>
                                     <button
-                                        onClick={() => {
-                                            if (item.name === 'Data Intelligence') setIsDataIntelOpen(!isDataIntelOpen);
-                                            if (item.name === 'University Portal') setIsUniPortalOpen(!isUniPortalOpen);
-                                        }}
-                                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${(item.name === 'Data Intelligence' && isDataIntelOpen) || (item.name === 'University Portal' && isUniPortalOpen)
+                                        onClick={() => handleDropdownClick(item.name)}
+                                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors ${isDropdownOpen(item.name)
                                             ? 'bg-[#2b6cee]/10 text-[#2b6cee] font-semibold'
                                             : 'text-slate-600 hover:bg-slate-50 font-medium'
                                             }`}
@@ -103,12 +129,12 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
                                             <span className="material-symbols-outlined">{item.icon}</span>
                                             <span className="text-sm">{item.name}</span>
                                         </div>
-                                        <span className={`material-symbols-outlined text-[20px] transition-transform duration-300 ${(item.name === 'Data Intelligence' && isDataIntelOpen) || (item.name === 'University Portal' && isUniPortalOpen) ? 'rotate-180' : ''}`}>
+                                        <span className={`material-symbols-outlined text-[20px] transition-transform duration-300 ${isDropdownOpen(item.name) ? 'rotate-180' : ''}`}>
                                             expand_more
                                         </span>
                                     </button>
 
-                                    <div className={`overflow-hidden transition-all duration-300 ${(item.name === 'Data Intelligence' && isDataIntelOpen) || (item.name === 'University Portal' && isUniPortalOpen) ? 'max-h-60 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                    <div className={`overflow-hidden transition-all duration-300 ${isDropdownOpen(item.name) ? 'max-h-80 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
                                         <div className="pl-12 pr-4 py-1 flex flex-col gap-1 border-l-2 border-slate-100 ml-7">
                                             {item.children?.map(child => (
                                                 <Link
@@ -129,19 +155,15 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
                                 </>
                             ) : (
                                 <Link
-                                    to={item.path}
+                                    to={item.path!}
                                     onClick={() => setIsSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${(location.pathname === item.path ||
+                                        (item.name === 'Strategic Dashboard' && location.pathname === '/Superadmin') ||
+                                        (item.name === 'Operational Hub' && location.pathname === '/Superadmin/counsellor-portal/dashboard') ||
                                         (item.name === 'Universities' && (
-                                            location.pathname.startsWith('/Superadmin/university') ||
-                                            location.pathname.startsWith('/Superadmin/applications') ||
-                                            location.pathname.startsWith('/Superadmin/active-partners') ||
-                                            location.pathname.startsWith('/Superadmin/top-performers')
+                                            location.pathname.startsWith('/Superadmin/university')
                                         )) ||
-                                        (item.name === 'Consultants' && (
-                                            location.pathname.startsWith('/Superadmin/counsellors') ||
-                                            location.pathname.startsWith('/Superadmin/active-today')
-                                        )))
+                                        (item.name === 'User Management' && location.pathname === '/Superadmin/users'))
                                         ? 'bg-[#2b6cee]/10 text-[#2b6cee] font-semibold'
                                         : 'text-slate-600 hover:bg-slate-50 font-medium'
                                         }`}
@@ -155,60 +177,30 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
                 </nav>
 
                 <div className="p-4 border-t border-slate-100 flex flex-col gap-2">
-                    {/* Mobile-only Sign Out */}
+                    {/* Sign Out - Always Visible */}
                     <button
                         onClick={() => {
                             logout();
                             navigate('/login');
                         }}
-                        className="lg:hidden w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-left group"
                     >
-                        <span className="material-symbols-outlined">logout</span>
+                        <span className="material-symbols-outlined transition-transform group-hover:-translate-x-1">logout</span>
                         <span className="text-sm font-bold">Sign Out</span>
                     </button>
 
-                    <div className="mt-4 flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl">
-                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA5Qrrx8XIF5fczse7_DsDA50G-m4klPEPj-Jz8cPuwhtt-XPwa3SUP2BbNphmG7UchjPfCK28furJVIWSFqncb_cwqMhx2aKkNIZ1_81sua0geMEy6DJ-CshFMH-skwPAOnacVKBFKI-_hdSqcuUAOy091hJ5w4jSF4kGsHihaw6hhuUjjs9S00nZpBJbP9Hcpetr-4gV2s7Ghm3jaj3b87t7rPAy628R_kepXey4RQMBz7GU-HjXxfeJuZ0-PwmbLGQAVQyeAyGc")' }}></div>
+                    <div className="mt-2 flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 shrink-0 shadow-sm" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA5Qrrx8XIF5fczse7_DsDA50G-m4klPEPj-Jz8cPuwhtt-XPwa3SUP2BbNphmG7UchjPfCK28furJVIWSFqncb_cwqMhx2aKkNIZ1_81sua0geMEy6DJ-CshFMH-skwPAOnacVKBFKI-_hdSqcuUAOy091hJ5w4jSF4kGsHihaw6hhuUjjs9S00nZpBJbP9Hcpetr-4gV2s7Ghm3jaj3b87t7rPAy628R_kepXey4RQMBz7GU-HjXxfeJuZ0-PwmbLGQAVQyeAyGc")' }}></div>
                         <div className="flex flex-col min-w-0">
                             <p className="text-[#111318] text-xs font-bold truncate">James Wilson</p>
-                            <p className="text-slate-500 text-[10px] truncate">Admin View</p>
+                            <p className="text-slate-500 text-[10px] truncate">Administrator</p>
                         </div>
-
                     </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col min-h-0 overflow-x-hidden">
-                {/* Header (Desktop) */}
-                <header className="hidden lg:flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 z-40 shrink-0">
-                    <div className="flex flex-col">
-                        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative w-72">
-                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
-                            <input
-                                className="w-full bg-slate-100 border-none rounded-lg pl-10 pr-4 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-[#2b6cee]/20 transition-all"
-                                placeholder="Search across platform..."
-                                type="text"
-                            />
-                        </div>
-                        <button className="relative bg-white border border-slate-200 size-10 rounded-lg flex items-center justify-center hover:bg-slate-50 transition-colors">
-                            <span className="material-symbols-outlined text-slate-600">notifications</span>
-                            <span className="absolute top-2 right-2 size-2 bg-rose-500 rounded-full border-2 border-white"></span>
-                        </button>
-                        <div className="h-8 w-px bg-slate-200 mx-2"></div>
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="bg-rose-50 text-rose-600 px-4 py-2 rounded-lg hover:bg-rose-100 transition-all flex items-center gap-2 font-semibold"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">logout</span>
-                            Sign Out
-                        </button>
-                    </div>
-                </header>
-
+            <main className="flex-1 flex flex-col min-h-0 overflow-x-hidden bg-slate-50/50">
                 {/* Page Content */}
                 <div className="flex-1 overflow-y-auto min-h-0">
                     {children}
@@ -220,4 +212,3 @@ const SuperAdminLayout: React.FC<SuperAdminLayoutProps> = ({ children, title }) 
 };
 
 export default SuperAdminLayout;
-

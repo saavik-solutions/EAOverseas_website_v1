@@ -4,7 +4,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import { useUserProfile } from '@/shared/contexts/UserProfileContext';
 import ConnectionsPopup from '@/features/community/ConnectionsPopup';
 
-const MyProfile = () => {
+const MyProfile = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const isReadOnly = searchParams.get('readonly') === 'true';
