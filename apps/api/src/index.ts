@@ -150,10 +150,24 @@ io.on('connection', (socket) => {
 });
 
 // ── Database and Server ──────────────────────────────────────────────────────
-connectDB().then(() => {
-    logger.info('Institutional Database Link Established');
-    console.log('Routes mounted: /api/v1, /api/external');
-    server.listen(PORT, () => {
-        logger.info(`Server running on port ${PORT}`);
-    });
-});
+const startServer = async () => {
+    try {
+        await connectDB();
+        logger.info('Institutional Database Link Established');
+        
+        // Only start listening if not running as a Vercel Serverless Function
+        if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+            server.listen(PORT, () => {
+                logger.info(`Server running on port ${PORT}`);
+                console.log('Routes mounted: /api/v1, /api/external');
+            });
+        }
+    } catch (error) {
+        logger.error('Failed to start server:', error);
+    }
+};
+
+startServer();
+
+// Export the app for Vercel Serverless Functions
+export default app;
