@@ -1,7 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { experts } from '@/data/experts';
 
 const Team = () => {
@@ -9,10 +7,7 @@ const Team = () => {
     const teamMembers = experts;
 
     return (
-        <div className="bg-[#f6f6f8] text-[#111218] font-sans antialiased min-h-screen">
-            <Navbar />
-
-            <main className="max-w-[1200px] mx-auto py-12 px-6">
+        <div className="max-w-[1200px] mx-auto py-12 px-6">
                 {/* Page Heading */}
                 <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
                     <div className="max-w-2xl">
@@ -52,39 +47,6 @@ const Team = () => {
                         </div>
                     ))}
                 </div>
-
-                {/* Talk to Consultant CTA */}
-                <section className="relative rounded-2xl md:rounded-3xl overflow-hidden bg-[#2563eb] mt-24 mb-10 text-center">
-                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-                        <div className="absolute -top-12 md:-top-24 -left-12 md:-left-24 size-40 md:size-80 border-2 border-white/10 rounded-full"></div>
-                        <div className="absolute top-1/2 -right-12 md:-right-24 size-48 md:size-96 border-2 border-white/10 rounded-full"></div>
-                    </div>
-
-                    <div className="relative z-10 flex flex-col items-center justify-center py-10 md:py-16 px-6 text-center">
-                        <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-10">
-                            Talk to Our Consultant Now
-                        </h2>
-
-                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full max-w-2xl">
-                            <input
-                                type="text"
-                                placeholder="First Name"
-                                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 md:py-3 text-white placeholder-white/60 focus:outline-none focus:bg-white/20 backdrop-blur-sm text-sm md:text-base"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Phone No."
-                                className="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 md:py-3 text-white placeholder-white/60 focus:outline-none focus:bg-white/20 backdrop-blur-sm text-sm md:text-base"
-                            />
-                            <button className="bg-[#0f172a] hover:bg-black text-white font-medium px-8 py-2.5 md:py-3 rounded-lg transition-colors shadow-lg text-sm md:text-base">
-                                Send
-                            </button>
-                        </div>
-                    </div>
-                </section>
-            </main>
-
-            <Footer />
         </div>
     );
 };

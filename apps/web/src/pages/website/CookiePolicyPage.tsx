@@ -1,12 +1,8 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 const CookiePolicy = () => {
     return (
-        <div className="bg-white text-[#111418] font-sans antialiased">
-            <Navbar />
-            <main className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 md:py-12">
                 <section className="mb-8 md:mb-12">
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-3 md:mb-4">Cookie Policy</h1>
                     <p className="text-base md:text-lg text-gray-600">
@@ -72,13 +68,11 @@ const CookiePolicy = () => {
                             If you have questions about our cookie policy, please contact us:
                         </p>
                         <div className="space-y-1.5 md:space-y-2 text-gray-600 text-sm md:text-base">
-                            <p>Email: info@eaoverseas.com</p>
-                            <p>Phone: +1 (555) 123-4367</p>
+                            <p>Email: info@saaviksolutions.com</p>
+                            <p>Phone: +1 (408) 741 6969</p>
                         </div>
                     </div>
                 </section>
-            </main>
-            <Footer />
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { submitLead } from '@/services/leadVault';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const BookingCTASection = () => {
   // Tabs: 'guided' (multi-step flow) or 'direct' (one-step form)
@@ -11,7 +12,6 @@ const BookingCTASection = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form State
   const [formData, setFormData] = useState({
     degree: 'Master\'s',
     country: '',
@@ -19,25 +19,56 @@ const BookingCTASection = () => {
     course: '',
     fullName: '',
     email: '',
+    countryCode: '+91',
     mobile: ''
   });
+
+  const COUNTRY_CODES = [
+    { code: '+91', label: 'IN' },
+    { code: '+1', label: 'US/CA' },
+    { code: '+44', label: 'UK' },
+    { code: '+61', label: 'AU' },
+    { code: '+971', label: 'UAE' },
+  ];
 
   const updateForm = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleBookingSubmit = async () => {
+    if (!formData.fullName.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    if (!/^\d{7,15}$/.test(formData.mobile.replace(/[\s-]/g, ''))) {
+      toast.error('Please enter a valid mobile number');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await submitLead({
+      const result = await submitLead({
         source: activeTab === 'guided' ? 'Booking Guided Form' : 'Booking Direct Enquiry',
-        name: formData.fullName || 'Unknown',
-        email: formData.email || 'not-provided@example.com',
-        phone: formData.mobile,
-        interest: `Degree: ${formData.degree}, Country: ${formData.country}, Year: ${formData.year}, Course: ${formData.course}`
+        data: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: `${formData.countryCode} ${formData.mobile}`,
+          interest: `Degree: ${formData.degree}, Country: ${formData.country}, Year: ${formData.year}, Course: ${formData.course}`
+        }
       });
-      navigate('/thank-you');
+      
+      if (result.success) {
+        navigate('/thank-you');
+      } else {
+        toast.error('Failed to submit your enquiry. Please try again.');
+        console.error('Submission failed:', result.message);
+      }
     } catch (error) {
+      toast.error('Network error. Please try again.');
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -237,11 +268,20 @@ const BookingCTASection = () => {
 
       <div className="pb-4">
         <label className="block text-[#111827] font-bold text-[13px] mb-1.5 tracking-wide">Mobile number</label>
-        <div className="flex rounded-xl border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#7c3aed]/20 focus-within:border-[#7c3aed] transition-all bg-white">
-          <button className="flex items-center space-x-1 px-4 py-3 bg-gray-50/50 border-r border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-colors">
-            <span>IN + (91)</span>
+        <div className="flex rounded-xl border border-gray-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#7c3aed]/20 focus-within:border-[#7c3aed] transition-all bg-white relative">
+          <select
+            value={formData.countryCode}
+            onChange={(e) => updateForm('countryCode', e.target.value)}
+            className="appearance-none bg-gray-50/50 border-r border-gray-200 text-sm font-semibold text-gray-700 px-3 py-3 hover:bg-gray-100 transition-colors focus:outline-none cursor-pointer z-10 min-w-[90px]"
+            style={{ paddingRight: '1.5rem' }}
+          >
+            {COUNTRY_CODES.map(c => (
+              <option key={c.code} value={c.code}>{c.label} ({c.code})</option>
+            ))}
+          </select>
+          <div className="absolute left-[70px] top-1/2 -translate-y-1/2 pointer-events-none z-20">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
-          </button>
+          </div>
           <input 
             type="tel"
             placeholder="Enter mobile"

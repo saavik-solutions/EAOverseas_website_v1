@@ -1,13 +1,8 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 const TermsAndConditions = () => {
     return (
-        <div className="bg-[#f6f6f8] text-[#475569] font-display min-h-screen flex flex-col">
-            <Navbar />
-
-            <main className="max-w-[1280px] mx-auto px-4 md:px-10 py-6 md:py-10 flex-1 w-full">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-10 py-6 md:py-10 flex-1 w-full">
                 {/* Page Heading Section */}
                 <div className="flex flex-wrap justify-between items-end gap-4 md:gap-6 mb-8 md:mb-12">
                     <div className="flex min-w-72 flex-col gap-2 md:gap-3 max-w-2xl">
@@ -224,11 +219,11 @@ const TermsAndConditions = () => {
                                     <ul className="space-y-2 text-sm md:text-base">
                                         <li className="flex items-center gap-3">
                                             <span className="material-symbols-outlined text-[#3f6ee4] text-[20px]">mail</span>
-                                            <span><span className="font-semibold">Email:</span> info@eaoverseas.com</span>
+                                            <span><span className="font-semibold">Email:</span> info@saaviksolutions.com</span>
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <span className="material-symbols-outlined text-[#3f6ee4] text-[20px]">phone</span>
-                                            <span><span className="font-semibold">Phone:</span> +91 9701563362</span>
+                                            <span><span className="font-semibold">Phone:</span> +91 97015 63362</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -249,9 +244,6 @@ const TermsAndConditions = () => {
                         </section>
                     </div>
                 </div>
-            </main>
-
-            <Footer />
         </div>
     );
 };

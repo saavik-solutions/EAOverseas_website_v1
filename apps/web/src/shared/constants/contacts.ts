@@ -5,10 +5,10 @@ export const CONTACTS = {
         message: 'Hello! I am interested in learning more about study abroad opportunities with EAOverseas.',
     },
     support: {
-        email: 'support@eaoverseas.com',
-        phone: '+91 6366421078',
-        tollFree: '1800-270-6088',
-        address: '1st floor, Chandermukhi Building, Nariman Point, Mumbai, Maharashtra 400021',
+        email: 'info@saaviksolutions.com',
+        phone: '+1 (408) 741 6969',
+        phoneSecondary: '+91 97015 63362',
+        address: '6250 West Park Dr Ste 319, Houston, TX 77057 United States',
     },
     socials: {
         facebook: 'https://facebook.com/eaoverseas',

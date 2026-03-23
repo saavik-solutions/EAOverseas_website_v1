@@ -1,7 +1,5 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { experts } from '@/data/experts';
 
 const ExpertProfile = () => {
@@ -10,27 +8,18 @@ const ExpertProfile = () => {
 
     if (!expert) {
         return (
-            <div className="bg-white font-display text-[#111218] min-h-screen flex flex-col">
-                <Navbar />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold mb-4">Expert Not Found</h2>
-                        <p className="mb-6">Sorry, we couldn't find the expert you're looking for.</p>
-                        <Link to="/team" className="text-blue-600 hover:underline">Back to Team</Link>
-                    </div>
+            <div className="flex-1 flex items-center justify-center py-20">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold mb-4">Expert Not Found</h2>
+                    <p className="mb-6">Sorry, we couldn't find the expert you're looking for.</p>
+                    <Link to="/team" className="text-blue-600 hover:underline">Back to Team</Link>
                 </div>
-                <Footer />
             </div>
         );
     }
 
     return (
-        <div className="bg-white font-display text-[#111218] transition-colors duration-300">
-            <Navbar />
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
-                {/* Header was here, replaced by Navbar */}
-
-                <main className="max-w-[1280px] mx-auto w-full px-6 py-12">
+        <div className="max-w-[1280px] mx-auto w-full px-6 py-12">
                     <div className="flex flex-col lg:flex-row gap-12">
                         <div className="flex-1">
                             <div className="flex flex-col md:flex-row gap-8 mb-16">
@@ -82,9 +71,6 @@ const ExpertProfile = () => {
                         </div>
                         {/* Sidebar removed */}
                     </div>
-                </main>
-            </div>
-            <Footer />
         </div>
     );
 };

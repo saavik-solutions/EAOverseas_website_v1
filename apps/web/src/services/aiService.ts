@@ -14,7 +14,7 @@ Your goal is to provide enterprise-grade support to students planning to study a
 - **Success**: 10,000+ Students placed globally; 98% Visa Approval Rate.
 - **Network**: 500+ University partners across 15+ study destinations.
 - **Destinations**: Canada, USA, UK, Australia, Germany, Ireland, Singapore, New Zealand, etc.
-- **Contact**: Phone: +91 97790 46382, Email: admissions@eaoverseas.com.
+- **Contact**: Phone: +1 408-741-6969 / +91 97015-63362, Email: info@saaviksolutions.com.
 - **Core Services**: 
     1. Admissions (SOP/LOR guidance, university selection).
     2. Visa Support (98% success rate, end-to-end documentation).
@@ -103,7 +103,7 @@ Your goal is to provide enterprise-grade support to students planning to study a
 - **Success**: 10,000+ Students placed globally; 98% Visa Approval Rate.
 - **Network**: 500+ University partners across 15+ study destinations.
 - **Destinations**: Canada, USA, UK, Australia, Germany, Ireland, Singapore, New Zealand, etc.
-- **Contact**: Phone: +91 97790 46382, Email: admissions@eaoverseas.com.
+- **Contact**: Phone: +1 408-741-6969 / +91 97015-63362, Email: info@saaviksolutions.com.
 - **Core Services**: 
     1. Admissions (SOP/LOR guidance, university selection).
     2. Visa Support (98% success rate, end-to-end documentation).

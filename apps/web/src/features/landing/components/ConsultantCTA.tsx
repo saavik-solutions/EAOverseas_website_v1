@@ -7,17 +7,35 @@ const ConsultantCTA = () => {
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [countryCode, setCountryCode] = useState('+91');
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+    const COUNTRY_CODES = [
+        { code: '+91', label: 'IN' },
+        { code: '+1', label: 'US/CA' },
+        { code: '+44', label: 'UK' },
+        { code: '+61', label: 'AU' },
+        { code: '+971', label: 'UAE' },
+    ];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!/^\d{7,15}$/.test(phone.replace(/[\s-]/g, ''))) {
+            alert('Please enter a valid phone number');
+            return;
+        }
+
         setStatus('submitting');
         const res = await submitLead({
             source: 'Landing Consultant CTA',
-            name,
-            email: 'not-provided@example.com',
-            phone,
-            interest: 'Talk to Consultant'
+            data: {
+                name,
+                email: 'not-provided@example.com',
+                phone: `${countryCode} ${phone}`,
+                interest: 'Talk to Consultant',
+                formName: 'Consultant CTA'
+            }
         });
         if (res.success) {
             navigate('/thank-you');
@@ -51,11 +69,22 @@ const ConsultantCTA = () => {
                                 required
                             />
                         </div>
-                        <div className="cta-input-group">
+                        <div className="cta-input-group" style={{ display: 'flex', gap: '8px' }}>
+                            <select
+                                value={countryCode}
+                                onChange={(e) => setCountryCode(e.target.value)}
+                                className="cta-input"
+                                style={{ width: '85px', padding: '0 10px', backgroundColor: '#f9fafb' }}
+                            >
+                                {COUNTRY_CODES.map(c => (
+                                    <option key={c.code} value={c.code}>{c.code}</option>
+                                ))}
+                            </select>
                             <input
-                                type="text"
+                                type="tel"
                                 placeholder="Phone No"
                                 className="cta-input"
+                                style={{ flex: 1 }}
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 required

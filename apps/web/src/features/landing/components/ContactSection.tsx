@@ -2,17 +2,28 @@ import React, { useState } from 'react';
 import { CONTACTS } from '@/shared/constants/contacts';
 import { submitLead } from '@/services/leadVault';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const ContactSection = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        countryCode: '+91',
+        phone: '',
         subject: '',
         message: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+    const COUNTRY_CODES = [
+        { code: '+91', label: 'IN' },
+        { code: '+1', label: 'US/CA' },
+        { code: '+44', label: 'UK' },
+        { code: '+61', label: 'AU' },
+        { code: '+971', label: 'UAE' },
+    ];
 
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -23,33 +34,40 @@ const ContactSection = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+             toast.error('Please enter a valid email address');
+             return;
+        }
+
+        if (!/^\d{7,15}$/.test(formData.phone.replace(/[\s-]/g, ''))) {
+             toast.error('Please enter a valid phone number');
+             return;
+        }
+
         setIsSubmitting(true);
         setSubmitStatus('idle');
 
         try {
-            const response = await fetch(`${API_BASE}/api/inquiries`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            const data = await response.json();
-
-            // Capture in Institutional Lead Vault
-            await submitLead({
-                source: 'EAOverseas_Main_Website',
+            const result = await submitLead({
+                source: 'Home Contact Section',
                 data: {
-                    ...formData,
+                    name: formData.name,
+                    email: formData.email,
+                    phone: `${formData.countryCode} ${formData.phone}`,
+                    subject: formData.subject,
+                    message: formData.message,
                     formName: 'Contact Section'
                 }
             });
-            if (data.success) {
+
+            if (result.success) {
                 navigate('/thank-you');
                 setSubmitStatus('success');
-                setFormData({ name: '', email: '', subject: '', message: '' });
+                setFormData({ name: '', email: '', countryCode: '+91', phone: '', subject: '', message: '' });
             } else {
                 setSubmitStatus('error');
+                toast.error('Failed to submit message.');
             }
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -82,8 +100,8 @@ const ContactSection = () => {
                                         <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"></path></svg>
                                     </div>
                                     <div>
-                                        <span className="block text-sm font-bold text-purple-200 uppercase tracking-widest mb-1">Toll Free</span>
-                                        <a className="text-xl font-bold hover:text-white transition-colors tracking-tight" href={`tel:${CONTACTS.support.tollFree}`}>{CONTACTS.support.tollFree}</a>
+                                        <span className="block text-sm font-bold text-purple-200 uppercase tracking-widest mb-1">Secondary Phone</span>
+                                        <a className="text-xl font-bold hover:text-white transition-colors tracking-tight" href={`tel:${CONTACTS.support.phoneSecondary}`}>{CONTACTS.support.phoneSecondary}</a>
                                     </div>
                                 </li>
 
@@ -146,6 +164,24 @@ const ContactSection = () => {
                                         id="email" name="email" placeholder="kashyap@example.com" required type="email"
                                         value={formData.email} onChange={handleChange}
                                     />
+                                </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-[13px] font-extrabold text-gray-400 uppercase tracking-wider ml-1" htmlFor="phone">Phone Number</label>
+                                    <div className="flex rounded-2xl bg-gray-50 border-gray-100 border-2 focus-within:border-[#7a29c2] focus-within:bg-white focus-within:ring-4 focus-within:ring-purple-500/5 transition-all outline-none">
+                                        <select
+                                            name="countryCode"
+                                            value={formData.countryCode}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
+                                            className="appearance-none bg-transparent text-sm font-semibold text-gray-700 px-4 py-4 focus:outline-none cursor-pointer border-r border-gray-200"
+                                        >
+                                            {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+                                        </select>
+                                        <input
+                                            className="w-full px-4 py-4 bg-transparent outline-none placeholder:text-gray-300 font-bold"
+                                            id="phone" name="phone" placeholder="9876543210" required type="tel"
+                                            value={formData.phone} onChange={handleChange}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop } from '@workspace/ui';
 import MainLayout from '@/layouts/MainLayout';
+import WebsiteLayout from '@/layouts/WebsiteLayout';
 import LandingPage from '@/pages/website/LandingPage';
 import TermsAndConditions from '@/pages/website/TermsAndConditions';
 import CookiePolicy from '@/pages/website/CookiePolicyPage';
@@ -14,10 +15,15 @@ import ContactUs from '@/pages/website/ContactUs';
 import AllDestinations from '@/pages/website/AllDestinations';
 import Blogs from '@/pages/website/Blogs';
 import BlogDetails from '@/pages/website/BlogDetails';
+import ThankYou from '@/pages/website/ThankYou';
 import Testimonials from '@/pages/website/Testimonials';
 import StudentStory from '@/pages/website/StudentStory';
 import HomeDashboard from '@/pages/dashboard/HomeDashboard';
 import Courses from '@/pages/dashboard/Courses';
+import AdminLayout from '@/layouts/AdminLayout';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import BlogManagement from '@/pages/admin/BlogManagement';
+import LeadVault from '@/pages/admin/LeadVault';
 // Heavy routes lazy loaded for performance
 const Feed = React.lazy(() => import('@/pages/dashboard/Feed'));
 const CommunityFeed = React.lazy(() => import('@/pages/dashboard/CommunityFeed'));
@@ -172,21 +178,35 @@ function App() {
                                     <Routes>
                                         <Route path="/" element={<HomeRoute />} />
                                         <Route path="/landing" element={<Navigate to="/" replace />} />
-                                        <Route path="/terms" element={<TermsAndConditions />} />
-                                        <Route path="/cookie-policy" element={<CookiePolicy />} />
-                                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                                        <Route path="/about" element={<AboutUs />} />
-                                        <Route path="/team" element={<Team />} />
-                                        <Route path="/expert-profile" element={<Navigate to="/team" replace />} />
-                                        <Route path="/expert-profile/:expertId" element={<ExpertProfile />} />
-                                        <Route path="/countries" element={<Countries />} />
-                                        <Route path="/country/:countryCode" element={<CountryDetails />} />
-                                        <Route path="/contact" element={<ContactUs />} />
-                                        <Route path="/all-destinations" element={<AllDestinations />} />
-                                        <Route path="/blogs" element={<Blogs />} />
-                                        <Route path="/blogs/:id" element={<BlogDetails />} />
-                                        <Route path="/testimonials" element={<Testimonials />} />
-                                        <Route path="/testimonials/:id" element={<StudentStory />} />
+
+                                        {/* Public Website Sub-pages with standardized layout (Top Spacing) */}
+                                        <Route element={<WebsiteLayout />}>
+                                            <Route path="/terms" element={<TermsAndConditions />} />
+                                            <Route path="/cookie-policy" element={<CookiePolicy />} />
+                                            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                                            <Route path="/about" element={<AboutUs />} />
+                                            <Route path="/team" element={<Team />} />
+                                            <Route path="/expert-profile" element={<Navigate to="/team" replace />} />
+                                            <Route path="/expert-profile/:expertId" element={<ExpertProfile />} />
+                                            <Route path="/countries" element={<Countries />} />
+                                            <Route path="/country/:countryCode" element={<CountryDetails />} />
+                                            <Route path="/contact" element={<ContactUs />} />
+                                            <Route path="/all-destinations" element={<AllDestinations />} />
+                                            <Route path="/blogs" element={<Blogs />} />
+                                            <Route path="/blogs/:id" element={<BlogDetails />} />
+                                            <Route path="/testimonials" element={<Testimonials />} />
+                                            <Route path="/thank-you" element={<ThankYou />} />
+                                            <Route path="/testimonials/:id" element={<StudentStory />} />
+                                        </Route>
+
+                                        {/* Enterprise Admin Dashboard */}
+                                        <Route path="/admin" element={<AdminLayout />}>
+                                            <Route index element={<Navigate to="dashboard" replace />} />
+                                            <Route path="dashboard" element={<AdminDashboard />} />
+                                            <Route path="blogs" element={<BlogManagement />} />
+                                            <Route path="leads" element={<LeadVault />} />
+                                            <Route path="settings" element={<div className="p-10 text-2xl font-black">System Settings Under Construction</div>} />
+                                        </Route>
 
                                         {/* Auth Routes */}
                                         <Route path="/login" element={<Login />} />

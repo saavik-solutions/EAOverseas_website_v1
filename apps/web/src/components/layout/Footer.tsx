@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CONTACTS, getWhatsAppLink } from '@/shared/constants/contacts';
 import { destinations } from '@/data/countries';
+import logo from '@/assets/logo.png';
 
 const FALLBACK = 'https://student.eaoverseas.com';
 
@@ -88,8 +89,16 @@ const Footer = () => {
 
             {/* Brand & Contact */}
             <div className="flex flex-col">
-              <div className="bg-[#7a29c2] text-white w-12 h-12 flex items-center justify-center rounded-full text-2xl font-serif italic mb-5 shadow-lg shadow-purple-500/20">
-                EA
+              <div 
+                className="flex-shrink-0 cursor-pointer select-none mb-5"
+                onClick={() => navigate('/')}
+              >
+                <img 
+                  src={logo} 
+                  alt="EAOverseas" 
+                  className="h-12 w-auto object-contain transition-all duration-300 ease-in-out" 
+                  style={{ filter: 'brightness(0) saturate(100%) invert(100%)' }}
+                />
               </div>
               <h3 className="text-[18px] font-bold mb-2 tracking-tight text-white">Need an Admission Roadmap?</h3>
               <p className="text-[13px] text-gray-400 mb-5 leading-relaxed">
@@ -115,9 +124,9 @@ const Footer = () => {
               <div className="border-t border-white/10 pt-5">
                 <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mb-3">Contact</p>
                 <div className="space-y-2">
-                  <a href={`tel:${CONTACTS.support.tollFree}`} className="flex items-center gap-2 text-[12px] text-gray-400 hover:text-white transition-colors">
+                  <a href={`tel:${CONTACTS.support.phoneSecondary}`} className="flex items-center gap-2 text-[12px] text-gray-400 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 text-[#7a29c2]"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.896-1.596-5.273-3.973-6.869-6.869l1.293-.97c.362-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
-                    {CONTACTS.support.tollFree}
+                    {CONTACTS.support.phoneSecondary}
                   </a>
                   <a href={`tel:${CONTACTS.support.phone}`} className="flex items-center gap-2 text-[12px] text-gray-400 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5 text-[#7a29c2]"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /></svg>

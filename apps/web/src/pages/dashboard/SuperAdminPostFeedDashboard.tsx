@@ -4,6 +4,9 @@ import PageHeader from '@/components/layout/PageHeader';
 import { universityService, UniversityData } from '@/services/universityService';
 import { feedService, PostResponse } from '@/services/feedService';
 import { usePosts, Post } from '@/shared/contexts/PostsContext';
+import { fetchAllAdminBlogs, deleteBlog } from '@/services/blogService';
+import AIBlogGeneratorModal from './AIBlogGeneratorModal';
+import BlogEditorModal from './BlogEditorModal';
 
 const TYPE_COLORS: Record<string, string> = {
     Article: 'bg-blue-100 text-blue-700',
@@ -13,6 +16,7 @@ const TYPE_COLORS: Record<string, string> = {
     Guide: 'bg-teal-100 text-teal-700',
     News: 'bg-sky-100 text-sky-700',
     Webinar: 'bg-violet-100 text-violet-700',
+    Blog: 'bg-purple-100 text-purple-700',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -23,7 +27,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 type ViewMode = 'grid' | 'table';
-type FilterType = 'All' | 'Article' | 'Scholarship' | 'Announcement' | 'Event' | 'Guide' | 'News' | 'Webinar';
+type FilterType = 'All' | 'Article' | 'Blog' | 'Scholarship' | 'Announcement' | 'Event' | 'Guide' | 'News' | 'Webinar';
 
 const SuperAdminPostFeedDashboard = () => {
     const navigate = useNavigate();
@@ -36,6 +40,10 @@ const SuperAdminPostFeedDashboard = () => {
     const [universities, setUniversities] = useState<UniversityData[]>([]);
     const [apiPosts, setApiPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedBlog, setSelectedBlog] = useState<any>(null);
+    const [rawBlogs, setRawBlogs] = useState<any[]>([]);
 
     const refreshData = async () => {
         setLoading(true);
@@ -49,6 +57,7 @@ const SuperAdminPostFeedDashboard = () => {
             // Map API posts to UI Post interface
             const mapped: Post[] = feedRes.map((p: any) => ({
                 id: p._id,
+                label: p.category || 'Article',
                 title: p.title,
                 about: p.content,
                 institution: p.universityName || p.authorId?.name || 'EA Overseas',
@@ -59,12 +68,34 @@ const SuperAdminPostFeedDashboard = () => {
                 category: p.category || 'Article',
                 status: 'Published',
                 grid: [
-                    { label: 'Views', value: p.viewCount.toString() },
-                    { label: 'Upvotes', value: p.score.toString() },
-                    { label: 'Comments', value: p.commentCount.toString() }
+                    { label: 'Views', value: (p.viewCount || 0).toString() },
+                    { label: 'Upvotes', value: (p.score || 0).toString() },
+                    { label: 'Comments', value: (p.commentCount || 0).toString() }
                 ]
             }));
-            setApiPosts(mapped);
+
+            const blogRes = await fetchAllAdminBlogs();
+            const mappedBlogs: Post[] = blogRes.map((b: any) => ({
+                id: b._id,
+                label: 'Blog',
+                title: b.title,
+                about: b.excerpt || b.content,
+                institution: 'Saavik Solutions AI',
+                logo: 'https://images.unsplash.com/photo-1675249681214-93e176723f6d?w=100&h=100&fit=crop',
+                banner: b.coverImage,
+                location: 'Global',
+                tags: b.tags || [],
+                category: 'Blog',
+                status: b.isPublished ? 'Published' : 'Draft',
+                grid: [
+                    { label: 'Views', value: (b.views || 0).toString() },
+                    { label: 'Likes', value: (b.likes || 0).toString() },
+                    { label: 'Status', value: b.isPublished ? 'Live' : 'Draft' }
+                ]
+            }));
+
+            setRawBlogs(blogRes);
+            setApiPosts([...mapped, ...mappedBlogs]);
         } catch (err) {
             console.error('Data sync failed', err);
         } finally {
@@ -87,6 +118,18 @@ const SuperAdminPostFeedDashboard = () => {
         return matchType && matchStatus && matchSearch && matchUniversity;
     });
 
+    const handleEdit = (postId: string, category?: string) => {
+        if (category === 'Blog') {
+            const blog = rawBlogs.find(b => b._id === postId);
+            if (blog) {
+                setSelectedBlog(blog);
+                setIsEditModalOpen(true);
+            }
+        } else {
+            navigate(`/Superadmin/university-portal/posts-feed/${postId}`);
+        }
+    };
+
     const formatValue = (val: number) => {
         if (val >= 1000) return (val / 1000).toFixed(1) + 'k';
         return val.toString();
@@ -104,11 +147,14 @@ const SuperAdminPostFeedDashboard = () => {
         { label: 'System Reach', value: formatValue(totalReach), icon: 'visibility', color: 'text-orange-600 bg-orange-50' },
     ];
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm('Are you sure you want to permanently remove this post from the cloud?')) {
+    const handleDelete = async (id: string, category?: string) => {
+        if (window.confirm('Are you sure you want to permanently remove this post?')) {
             try {
-                // In a real app we'd call feedService.delete(id)
-                deletePost(id); // Using context for now to simulate if no backend delete yet
+                if (category === 'Blog') {
+                    await deleteBlog(id);
+                } else {
+                    deletePost(id); // Context-based for feed posts for now
+                }
                 setApiPosts(prev => prev.filter(p => p.id !== id));
             } catch (err) {
                 console.error('Delete failed', err);
@@ -141,8 +187,28 @@ const SuperAdminPostFeedDashboard = () => {
                             <span className="material-symbols-outlined text-[18px]">add</span>
                             New Post
                         </button>
+                        <button
+                            onClick={() => setIsAIModalOpen(true)}
+                            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-black hover:bg-indigo-700 transition-all shadow-md active:scale-95"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
+                            AI Blog Generator
+                        </button>
                     </div>
                 }
+            />
+
+            <AIBlogGeneratorModal 
+                isOpen={isAIModalOpen}
+                onClose={() => setIsAIModalOpen(false)}
+                onSuccess={refreshData}
+            />
+
+            <BlogEditorModal 
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSuccess={refreshData}
+                blog={selectedBlog}
             />
 
             <div className="p-6 space-y-6">
@@ -225,7 +291,7 @@ const SuperAdminPostFeedDashboard = () => {
 
                 {/* Sub-tabs */}
                 <div className="flex gap-8 border-b border-slate-200 px-2">
-                    {(['All', 'Article', 'Scholarship', 'Announcement', 'Event', 'Guide'] as FilterType[]).map(t => (
+                    {(['All', 'Article', 'Blog', 'Scholarship', 'Announcement', 'Event', 'Guide'] as FilterType[]).map(t => (
                         <button
                             key={t}
                             onClick={() => setFilterType(t)}
@@ -249,7 +315,7 @@ const SuperAdminPostFeedDashboard = () => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {filtered.map(post => (
-                                <PostCard key={post.id} post={post} onManage={() => navigate(`/Superadmin/university-portal/posts-feed/${post.id}`)} />
+                                <PostCard key={post.id} post={post} onManage={() => handleEdit(post.id, post.category)} />
                             ))}
                             {filtered.length === 0 && <EmptyState />}
                         </div>
@@ -294,12 +360,12 @@ const SuperAdminPostFeedDashboard = () => {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => navigate(`/Superadmin/university-portal/posts-feed/${post.id}`)} className="size-8 rounded-lg bg-blue-50 text-[#2b6cee] flex items-center justify-center hover:bg-[#2b6cee] hover:text-white transition-all">
-                                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
-                                                    </button>
-                                                    <button onClick={() => handleDelete(post.id)} className="size-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
-                                                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                                                    </button>
+                                                     <button onClick={() => handleEdit(post.id, post.category)} className="size-8 rounded-lg bg-blue-50 text-[#2b6cee] flex items-center justify-center hover:bg-[#2b6cee] hover:text-white transition-all">
+                                                         <span className="material-symbols-outlined text-[18px]">edit</span>
+                                                     </button>
+                                                     <button onClick={() => handleDelete(post.id, post.category)} className="size-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
+                                                         <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                     </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -321,7 +387,7 @@ const SuperAdminPostFeedDashboard = () => {
 const PostCard = ({ post, onManage }: { post: Post; onManage: () => void }) => (
     <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full cursor-pointer" onClick={onManage}>
         <div className="relative h-48 overflow-hidden bg-slate-100">
-            <img src={post.banner || post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+            <img src={post.banner} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="absolute top-4 left-4 flex gap-2">
                 <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl backdrop-blur-md ${TYPE_COLORS[post.category || post.label]} border-white/20 shadow-sm`}>

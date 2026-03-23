@@ -18,20 +18,20 @@ const FigmaHeroSection: React.FC = () => {
       <div className="absolute top-[30%] right-[-10%] w-[50%] h-[50%] bg-[#9500e5] blur-[150px] opacity-20 rounded-full animate-pulse pointer-events-none" style={{ animationDuration: '6s' }} />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center text-center gap-10 px-4 max-w-[1200px] mx-auto w-full">
+      <div className="relative z-10 flex flex-col items-center justify-start md:justify-center text-center gap-6 md:gap-10 px-4 pt-28 md:pt-0 max-w-[1200px] mx-auto w-full min-h-screen md:min-h-fit">
         
         {/* Huge Heading */}
         <h1 className="flex flex-col font-medium leading-[1.05] tracking-tight drop-shadow-2xl">
-          <span className="text-white text-[70px] md:text-[90px] lg:text-[110px]" style={{ textShadow: '0px 0px 20px rgba(0,0,0,0.5)' }}>
+          <span className="text-white text-[38px] md:text-[90px] lg:text-[110px]" style={{ textShadow: '0px 0px 20px rgba(0,0,0,0.5)' }}>
             Where the World Is
           </span>
-          <span className="text-[#ffe5da] text-[70px] md:text-[90px] lg:text-[110px]" style={{ textShadow: '0px 0px 20px rgba(0,0,0,0.5)' }}>
+          <span className="text-[#ffe5da] text-[38px] md:text-[90px] lg:text-[110px]" style={{ textShadow: '0px 0px 20px rgba(0,0,0,0.5)' }}>
             Your Campus
           </span>
         </h1>
 
         {/* Animated Subtitle (Premium Motion Feel) */}
-        <div className="w-full max-w-[1000px] overflow-hidden mt-32 relative" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+        <div className="w-full max-w-[1000px] overflow-hidden mt-8 md:mt-32 relative" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
           <div 
             className="flex whitespace-nowrap" 
             style={{ animation: 'scroll-left 25s linear infinite' }}
@@ -58,6 +58,49 @@ const FigmaHeroSection: React.FC = () => {
             <p className="text-white text-[20px] md:text-[24px] lg:text-[28px] font-medium leading-relaxed drop-shadow-lg px-2" aria-hidden="true">
               EAOverseas helps you stand out to top universities and maximize your chances of admission.......
             </p>
+          </div>
+        </div>
+        
+        {/* Mobile Highlight Cards (Filled Content for Mobile) */}
+        <div className="flex md:hidden w-full overflow-x-auto pb-4 gap-4 no-scrollbar mt-6 mb-10 scroll-smooth">
+          <div className="flex-shrink-0 w-[240px] p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+            <div className="size-10 rounded-xl bg-[#7a29c2]/30 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-white text-xl">auto_awesome</span>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-2">Expert AI Guidance</h3>
+            <p className="text-white/70 text-sm leading-relaxed">Personalized roadmap for your dream university.</p>
+          </div>
+
+          <div className="flex-shrink-0 w-[240px] p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+            <div className="size-10 rounded-xl bg-[#f97316]/30 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-white text-xl">public</span>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-2">100+ Destinations</h3>
+            <p className="text-white/70 text-sm leading-relaxed">Explore opportunities across the globe.</p>
+          </div>
+
+          <div className="flex-shrink-0 w-[240px] p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+            <div className="size-10 rounded-xl bg-blue-500/30 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-white text-xl">groups</span>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-2">Global Community</h3>
+            <p className="text-white/70 text-sm leading-relaxed">Join thousands of successful students.</p>
+          </div>
+        </div>
+
+        {/* Desktop Mini Stats (Subtle) */}
+        <div className="hidden md:flex gap-12 mt-10">
+          <div className="flex flex-col items-center">
+            <span className="text-white text-4xl font-black">100+</span>
+            <span className="text-white/50 text-sm uppercase tracking-widest font-bold">Destinations</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-white text-4xl font-black">2.5k+</span>
+            <span className="text-white/50 text-sm uppercase tracking-widest font-bold">Admissions</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-white text-4xl font-black">100%</span>
+            <span className="text-white/50 text-sm uppercase tracking-widest font-bold">Visa Success</span>
           </div>
         </div>
 

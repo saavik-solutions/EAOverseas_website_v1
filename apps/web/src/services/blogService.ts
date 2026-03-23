@@ -12,7 +12,10 @@ export interface ExternalBlog {
   readTime: string;
   tags: string[];
   createdAt: string;
+  isPublished?: boolean; // New field for draft support
   content?: string;
+  _id?: string; // MongoDB ID for admin actions
+  category: string;
   authorName?: string;
   views?: number;
   likes?: number;
@@ -29,7 +32,7 @@ export interface ExternalBlogsResponse {
 let cachedBlogs: ExternalBlog[] | null = null;
 let fetchPromise: Promise<ExternalBlog[]> | null = null;
 
-const BASE_URL = 'https://ea-overseas-backend.render.com/api/v1/blogs';
+const BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/v1/blogs`;
 
 export const fetchExternalBlogs = async (category?: string): Promise<ExternalBlog[]> => {
   if (!category && cachedBlogs) return cachedBlogs;
@@ -55,6 +58,76 @@ export const fetchExternalBlogs = async (category?: string): Promise<ExternalBlo
     console.error('Error fetching external blogs:', err);
     if (!category) fetchPromise = null;
     return [];
+  }
+};
+
+const ADMIN_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/v1/admin/blogs`;
+
+export const fetchAllAdminBlogs = async (): Promise<ExternalBlog[]> => {
+  try {
+    const res = await fetch(`${ADMIN_BASE_URL}/all`);
+    if (!res.ok) throw new Error(`Failed to fetch admin blogs: ${res.statusText}`);
+    const data = await res.json();
+    return data.success ? data.blogs || [] : [];
+  } catch (err) {
+    console.error('Error fetching admin blogs:', err);
+    return [];
+  }
+};
+
+export const generateAIBlog = async (params: { category: string; mode: string; keywords?: string }): Promise<any> => {
+  try {
+    const res = await fetch(`${ADMIN_BASE_URL}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('AI Generation failed');
+    const data = await res.json();
+    return data.success ? data.blog : null;
+  } catch (err) {
+    console.error('Error generating AI blog:', err);
+    return null;
+  }
+};
+
+export const createBlog = async (blogData: any): Promise<boolean> => {
+  try {
+    const res = await fetch(ADMIN_BASE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(blogData)
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Error creating blog:', err);
+    return false;
+  }
+};
+
+export const updateBlog = async (id: string, blogData: any): Promise<boolean> => {
+  try {
+    const res = await fetch(`${ADMIN_BASE_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(blogData)
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Error updating blog:', err);
+    return false;
+  }
+};
+
+export const deleteBlog = async (id: string): Promise<boolean> => {
+  try {
+    const res = await fetch(`${ADMIN_BASE_URL}/${id}`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (err) {
+    console.error('Error deleting blog:', err);
+    return false;
   }
 };
 

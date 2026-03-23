@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { longFormStories } from '@/data/studentStories';
 
 const Testimonials = () => {
@@ -21,10 +19,7 @@ const Testimonials = () => {
     };
 
     return (
-        <div className="bg-white font-display text-[#111218] antialiased min-h-screen">
-            <Navbar />
-
-            <main className="max-w-[1200px] mx-auto px-6 py-12">
+        <div className="max-w-[1200px] mx-auto px-6 py-12">
                 {/* Page Heading */}
                 <section className="mb-12">
                     <div className="max-w-3xl">
@@ -211,9 +206,6 @@ const Testimonials = () => {
                         </form>
                     </div>
                 </section>
-            </main>
-
-            <Footer />
         </div>
     );
 };

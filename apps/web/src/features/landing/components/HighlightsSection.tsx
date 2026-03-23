@@ -123,7 +123,7 @@ const HighlightsSection = () => {
                     >
                         <div className="flex items-center gap-2 mb-2">
                             <span className="material-symbols-outlined text-purple-900 text-4xl">forum</span>
-                            <h3 className="text-4xl md:text-5xl font-black text-purple-950">156K+</h3>
+                            <h3 className="text-4xl md:text-5xl font-black text-purple-950">17.5k+</h3>
                         </div>
                         <p className="text-lg font-semibold text-purple-900/80 leading-tight">Student<br/>Counselled</p>
                     </div>

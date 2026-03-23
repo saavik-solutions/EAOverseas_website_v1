@@ -1,13 +1,8 @@
 import React from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 const PrivacyPolicy = () => {
     return (
-        <div className="bg-[#f6f6f8] text-[#111317] font-sans antialiased">
-            <Navbar />
-
-            <main className="max-w-[1000px] mx-auto px-6 py-12">
+        <div className="max-w-[1000px] mx-auto px-6 py-12">
                 {/* Page Header */}
                 <section className="mb-16">
                     <div className="mb-4">
@@ -189,9 +184,6 @@ const PrivacyPolicy = () => {
                         </div>
                     </section>
                 </div>
-            </main>
-
-            <Footer />
         </div>
     );
 };

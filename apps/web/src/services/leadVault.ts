@@ -3,7 +3,7 @@ export interface LeadData {
     data: Record<string, any>;
 }
 
-const BASE_URL = 'https://ea-overseas-backend.render.com/api/v1/leads';
+const BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/v1/leads`;
 
 export const submitLead = async (leadData: LeadData): Promise<{ success: boolean; leadId?: string; message?: string }> => {
     try {

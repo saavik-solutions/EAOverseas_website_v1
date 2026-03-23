@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { longFormStories } from '@/data/studentStories';
 
 const StudentStory = () => {
@@ -14,22 +12,15 @@ const StudentStory = () => {
 
     if (!story) {
         return (
-            <div className="bg-white min-h-screen flex flex-col">
-                <Navbar />
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <h1 className="text-2xl font-bold mb-4">Story Not Found</h1>
-                    <Link to="/testimonials" className="text-[#193ce6] hover:underline">Back to Testimonials</Link>
-                </div>
-                <Footer />
+            <div className="flex-1 flex flex-col items-center justify-center py-20">
+                <h1 className="text-2xl font-bold mb-4">Story Not Found</h1>
+                <Link to="/testimonials" className="text-[#193ce6] hover:underline">Back to Testimonials</Link>
             </div>
         );
     }
 
     return (
-        <div className="bg-white font-display text-[#111218] antialiased min-h-screen">
-            <Navbar />
-
-            <main>
+        <>
                 {/* Hero Section */}
                 <div className="relative h-[50vh] md:h-[60vh] min-h-[350px] md:min-h-[400px] w-full bg-cover bg-center" style={{ backgroundImage: `url('${story.heroImage}')` }}>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -101,10 +92,7 @@ const StudentStory = () => {
                         </div>
                     </div>
                 </div>
-            </main>
-
-            <Footer />
-        </div>
+        </>
     );
 };
 

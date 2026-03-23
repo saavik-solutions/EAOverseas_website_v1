@@ -3,97 +3,138 @@ import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 import { ExternalBlog, fetchExternalBlogs } from '@/services/blogService';
 
-// ─── Deterministic Aesthetic Mapping ─────────────────────────────────────────
-const PANEL_STYLES = [
-    { categoryColor: 'bg-blue-600', panelBg: '#1e3a6e' },
-    { categoryColor: 'bg-purple-600', panelBg: '#3b0764' },
-    { categoryColor: 'bg-emerald-600', panelBg: '#064e3b' },
-    { categoryColor: 'bg-red-600', panelBg: '#7f1d1d' },
-    { categoryColor: 'bg-sky-600', panelBg: '#0c4a6e' },
-    { categoryColor: 'bg-amber-600', panelBg: '#78350f' },
-    { categoryColor: 'bg-pink-600', panelBg: '#831843' },
-    { categoryColor: 'bg-teal-600', panelBg: '#134e4a' },
+// ─── Deterministic Tag Color Mapping ─────────────────────────────────────────
+const TAG_COLORS = [
+    'bg-violet-600',
+    'bg-blue-600',
+    'bg-emerald-600',
+    'bg-rose-600',
+    'bg-amber-500',
+    'bg-sky-600',
+    'bg-pink-600',
+    'bg-teal-600',
 ];
 
-const getAesthetic = (slug: string) => {
+const getTagColor = (slug: string) => {
     let hash = 0;
     for (let i = 0; i < slug.length; i++) hash = slug.charCodeAt(i) + ((hash << 5) - hash);
-    const index = Math.abs(hash) % PANEL_STYLES.length;
-    return PANEL_STYLES[index];
+    return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
 };
 
-const formatDateDayMonth = (dateString: string) => {
+const formatDate = (dateString: string) => {
     try {
         const d = new Date(dateString);
-        return {
-            dateDay: d.getDate().toString(),
-            dateMonth: d.toLocaleString('en-US', { month: 'short' })
-        };
+        return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
     } catch {
-        return { dateDay: '01', dateMonth: 'Jan' };
+        return 'Recent';
     }
 };
 
-// ─── Blog Card Panel with image + logo fallback ────────────────────────────────
+// ─── Skeleton Card ────────────────────────────────────────────────────────────
+const SkeletonCard: React.FC = () => (
+    <div className="flex-none w-[300px] sm:w-[320px] rounded-[20px] overflow-hidden bg-white border border-gray-100 shadow-sm animate-pulse">
+        <div className="h-[180px] bg-gray-200" />
+        <div className="p-5 space-y-3">
+            <div className="h-3 w-1/3 bg-gray-200 rounded-full" />
+            <div className="h-4 w-full bg-gray-200 rounded-full" />
+            <div className="h-4 w-5/6 bg-gray-200 rounded-full" />
+            <div className="h-3 w-2/3 bg-gray-200 rounded-full" />
+        </div>
+    </div>
+);
 
-const BlogHomePanel: React.FC<{ blog: ExternalBlog }> = ({ blog }) => {
+// ─── Blog Card ────────────────────────────────────────────────────────────────
+const BlogCard: React.FC<{ blog: ExternalBlog; index: number; isVisible: boolean }> = ({ blog, index, isVisible }) => {
+    const navigate = useNavigate();
     const [imgError, setImgError] = useState(false);
-    const aesthetic = getAesthetic(blog.slug);
-    const { dateDay, dateMonth } = formatDateDayMonth(blog.createdAt);
-    const categoryName = blog.tags && blog.tags.length > 0 ? blog.tags[0] : 'Insight';
+    const tagColor = getTagColor(blog.slug);
+    const tag = blog.tags && blog.tags.length > 0 ? blog.tags[0] : 'Insight';
 
     return (
-        <div
-            className="relative h-[160px] flex items-center justify-center overflow-hidden flex-shrink-0"
-            style={{ background: aesthetic.panelBg }}
+        <article
+            data-card
+            onClick={() => navigate(`/blogs/${blog.slug}`)}
+            className={`
+                flex-none w-[300px] sm:w-[320px] rounded-[20px] overflow-hidden
+                bg-white border border-gray-100
+                shadow-sm hover:shadow-xl hover:shadow-purple-100/60 hover:-translate-y-1.5
+                transition-all duration-300 cursor-pointer group flex flex-col
+                ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
+            `}
+            style={{ transitionDelay: `${index * 60}ms`, scrollSnapAlign: 'start' }}
         >
-            {/* Dot grid */}
-            <div className="absolute inset-0 pointer-events-none"
-                style={{
-                    backgroundImage: 'radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)',
-                    backgroundSize: '18px 18px',
-                }}
-            />
+            {/* ── Image Panel ── */}
+            <div className="relative h-[190px] overflow-hidden bg-gray-50 flex-shrink-0">
+                {blog.coverImage && !imgError ? (
+                    <img
+                        src={blog.coverImage}
+                        alt={blog.title}
+                        onError={() => setImgError(true)}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-700 via-violet-600 to-purple-900">
+                        {/* Grid overlay */}
+                        <div
+                            className="absolute inset-0 opacity-10"
+                            style={{
+                                backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
+                                backgroundSize: '28px 28px',
+                            }}
+                        />
+                        <img src={logo} alt="EAOverseas" className="relative z-10 h-20 w-auto object-contain drop-shadow-xl" style={{ filter: 'brightness(0) invert(1)' }} />
+                    </div>
+                )}
 
-            {/* Real image — swaps to fallback on error */}
-            {blog.coverImage && !imgError ? (
-                <img
-                    src={blog.coverImage}
-                    alt={blog.title}
-                    onError={() => setImgError(true)}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-            ) : (
-                <img
-                    src={logo}
-                    alt="EAOverseas"
-                    className="relative z-10 h-12 w-auto object-contain opacity-80"
-                    style={{ filter: 'brightness(0) invert(1)' }}
-                />
-            )}
+                {/* Tag badge */}
+                <span className={`absolute top-3 left-3 ${tagColor} text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg shadow-md`}>
+                    {tag}
+                </span>
 
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10 pointer-events-none" />
+                {/* Read time badge */}
+                <span className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-1 rounded-lg">
+                    {blog.readTime || '5 min'}
+                </span>
 
-            {/* Category badge */}
-            <span className={`absolute top-3 right-3 ${aesthetic.categoryColor} text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow z-10`}>
-                {categoryName}
-            </span>
+                {/* Bottom gradient */}
+                <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-black/30 to-transparent" />
+            </div>
 
-            {/* Date chip */}
-            <div className="absolute bottom-0 left-0 right-0 h-12 flex items-end px-4 pb-3 z-10"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)' }}>
-                <div className="flex items-center gap-1.5 text-white text-[11px] font-semibold">
-                    <span className="material-symbols-outlined text-[13px] opacity-75">calendar_today</span>
-                    {dateDay} {dateMonth} · {blog.readTime || '5 min read'}
+            {/* ── Content ── */}
+            <div className="flex flex-col flex-1 p-5 gap-3">
+                {/* Date */}
+                <div className="flex items-center gap-1.5 text-[11px] text-gray-400 font-medium">
+                    <span className="material-symbols-outlined text-[13px] text-purple-400">calendar_today</span>
+                    {formatDate(blog.createdAt)}
+                </div>
+
+                {/* Title */}
+                <h3 className="text-[15px] font-extrabold text-gray-900 leading-snug line-clamp-2 group-hover:text-purple-700 transition-colors duration-200 m-0">
+                    {blog.title}
+                </h3>
+
+                {/* Excerpt */}
+                <p className="text-[13px] text-gray-500 leading-relaxed line-clamp-3 flex-1 m-0">
+                    {blog.excerpt}
+                </p>
+
+                {/* Footer row */}
+                <div className="flex items-center justify-between pt-3.5 border-t border-gray-50 mt-auto">
+                    <span className="flex items-center gap-1.5 text-[12px] font-extrabold text-purple-600 group-hover:gap-2.5 transition-all duration-200">
+                        Read Article
+                        <span className="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                    </span>
+                    <div className="flex items-center gap-1 text-gray-300 text-[10px] font-bold uppercase tracking-wide">
+                        <span className="material-symbols-outlined text-[13px]">auto_stories</span>
+                        EAOverseas
+                    </div>
                 </div>
             </div>
-        </div>
+        </article>
     );
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
-
 const BlogSection: React.FC = () => {
     const navigate = useNavigate();
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -102,7 +143,6 @@ const BlogSection: React.FC = () => {
     const [activeIdx, setActiveIdx] = useState(0);
     const [canLeft, setCanLeft] = useState(false);
     const [canRight, setCanRight] = useState(true);
-
     const [blogs, setBlogs] = useState<ExternalBlog[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -118,10 +158,9 @@ const BlogSection: React.FC = () => {
         if (!el) return;
         setCanLeft(el.scrollLeft > 4);
         setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-        // sync active dot
         const card = el.querySelector<HTMLElement>('[data-card]');
         if (card) {
-            const cardW = card.offsetWidth + 24;
+            const cardW = card.offsetWidth + 20;
             setActiveIdx(Math.round(el.scrollLeft / cardW));
         }
     };
@@ -132,10 +171,8 @@ const BlogSection: React.FC = () => {
             { threshold: 0.1 }
         );
         if (sectionRef.current) io.observe(sectionRef.current);
-
         const el = scrollRef.current;
         if (el) el.addEventListener('scroll', updateArrows, { passive: true });
-
         return () => {
             io.disconnect();
             if (el) el.removeEventListener('scroll', updateArrows);
@@ -146,173 +183,133 @@ const BlogSection: React.FC = () => {
         if (!scrollRef.current) return;
         const card = scrollRef.current.querySelector<HTMLElement>('[data-card]');
         if (!card) return;
-        const cardW = card.offsetWidth + 24;
+        const cardW = card.offsetWidth + 20;
         const clamped = Math.max(0, Math.min(idx, blogs.length - 1));
         setActiveIdx(clamped);
         scrollRef.current.scrollTo({ left: clamped * cardW, behavior: 'smooth' });
     };
 
-    const scrollPrev = () => scrollTo(activeIdx - 1);
-    const scrollNext = () => scrollTo(activeIdx + 1);
-
     return (
-        <section ref={sectionRef} className="relative w-full py-24 overflow-hidden bg-transparent">
+        <section ref={sectionRef} className="relative w-full py-20 overflow-hidden bg-transparent">
+            {/* Ambient background blobs */}
+            <div
+                className="absolute -top-48 -left-40 w-[600px] h-[600px] rounded-full blur-[130px] pointer-events-none opacity-60"
+                style={{ background: 'radial-gradient(circle, rgba(122,41,194,0.07) 0%, transparent 70%)' }}
+            />
+            <div
+                className="absolute -bottom-40 -right-24 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none opacity-50"
+                style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)' }}
+            />
 
-            {/* Ambient blobs */}
-            <div className="absolute -top-40 -left-32 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(122,41,194,0.09) 0%, transparent 70%)' }} />
-            <div className="absolute -bottom-32 -right-20 w-[400px] h-[400px] rounded-full blur-[100px] pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)' }} />
+            <div className="max-w-[1320px] mx-auto px-6 md:px-10 relative z-10">
 
-            <div className="max-w-[1280px] mx-auto px-6 md:px-10 relative z-10">
-
-                {/* ─── Header ─── */}
-                <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                    <div className="flex flex-col gap-4 max-w-[560px]">
-                        <div className="inline-flex items-center gap-2 bg-[#7a29c2]/[0.08] border border-[#7a29c2]/20 text-[#7a29c2] text-xs font-bold tracking-[0.1em] uppercase py-1.5 px-4 rounded-full w-fit">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#7a29c2] animate-pulse" />
+                {/* ─── Section Header ─── */}
+                <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                    <div className="space-y-3">
+                        <div className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-purple-600 bg-purple-50 border border-purple-100 px-4 py-1.5 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
                             Edu Insights
                         </div>
-                        <h2 className="text-[36px] md:text-[44px] max-sm:text-[26px] font-extrabold text-[#0d0d0d] leading-[1.12] tracking-tight m-0">
+                        <h2 className="text-[34px] md:text-[44px] max-sm:text-[26px] font-extrabold text-gray-900 leading-tight tracking-tight m-0">
                             Latest{' '}
-                            <span className="bg-gradient-to-r from-[#7a29c2] to-[#9333ea] bg-clip-text text-transparent">
+                            <span className="bg-gradient-to-r from-purple-700 to-violet-500 bg-clip-text text-transparent">
                                 Study Abroad
                             </span>{' '}
                             News
                         </h2>
-                        <p className="text-[15px] text-gray-400 leading-relaxed m-0">
-                            Visa updates, scholarships, and expert guides — everything you need for your global education journey.
+                        <p className="text-[15px] text-gray-400 leading-relaxed max-w-lg m-0">
+                            Visa updates, scholarships & expert guides — everything you need for your global journey.
                         </p>
                     </div>
 
                     {/* Desktop CTA */}
                     <button
                         onClick={() => navigate('/blogs')}
-                        className="hidden sm:inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-[#7a29c2] to-[#9333ea] text-white text-sm font-bold rounded-full shadow-lg shadow-purple-200 hover:scale-105 active:scale-95 transition-all duration-200 flex-shrink-0"
+                        className="hidden sm:inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-purple-700 to-violet-500 text-white text-sm font-extrabold rounded-full shadow-lg shadow-purple-200/60 hover:scale-105 hover:shadow-xl hover:shadow-purple-200/70 active:scale-95 transition-all duration-200 flex-shrink-0"
                     >
-                        <span className="material-symbols-outlined text-[17px]">auto_stories</span>
+                        <span className="material-symbols-outlined text-[16px]">auto_stories</span>
                         All Articles
                     </button>
                 </div>
 
-                {/* ─── Cards ─── */}
+                {/* ─── Cards Carousel ─── */}
                 <div className="relative">
-
-                    {blogs.length > 0 && (
-                        <>
-                            {/* ← Prev arrow */}
-                            <button
-                                onClick={scrollPrev}
-                                disabled={!canLeft}
-                                aria-label="Scroll left"
-                                className={`
-                                    absolute left-0 top-1/2 -translate-y-1/2 z-20 -translate-x-1/2
-                                    w-10 h-10 rounded-full border border-gray-200 bg-white shadow-lg
-                                    flex items-center justify-center transition-all duration-200
-                                    ${canLeft ? 'text-[#7a29c2] hover:bg-purple-50 hover:border-purple-300 hover:scale-110' : 'text-gray-200 cursor-not-allowed opacity-50'}
-                                `}
-                            >
-                                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-                            </button>
-
-                            {/* → Next arrow */}
-                            <button
-                                onClick={scrollNext}
-                                disabled={!canRight}
-                                aria-label="Scroll right"
-                                className={`
-                                    absolute right-0 top-1/2 -translate-y-1/2 z-20 translate-x-1/2
-                                    w-10 h-10 rounded-full border border-gray-200 bg-white shadow-lg
-                                    flex items-center justify-center transition-all duration-200
-                                    ${canRight ? 'text-[#7a29c2] hover:bg-purple-50 hover:border-purple-300 hover:scale-110' : 'text-gray-200 cursor-not-allowed opacity-50'}
-                                `}
-                            >
-                                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-                            </button>
-                        </>
+                    {/* Prev Arrow */}
+                    {canLeft && (
+                        <button
+                            onClick={() => scrollTo(activeIdx - 1)}
+                            aria-label="Scroll left"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-20
+                                       w-10 h-10 rounded-full bg-white border border-gray-200 shadow-lg
+                                       flex items-center justify-center text-purple-600
+                                       hover:bg-purple-50 hover:border-purple-300 hover:scale-110 transition-all duration-200"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                        </button>
                     )}
 
+                    {/* Next Arrow */}
+                    {canRight && !loading && blogs.length > 0 && (
+                        <button
+                            onClick={() => scrollTo(activeIdx + 1)}
+                            aria-label="Scroll right"
+                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-20
+                                       w-10 h-10 rounded-full bg-white border border-gray-200 shadow-lg
+                                       flex items-center justify-center text-purple-600
+                                       hover:bg-purple-50 hover:border-purple-300 hover:scale-110 transition-all duration-200"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                        </button>
+                    )}
+
+                    {/* Scroll container */}
                     <div
                         ref={scrollRef}
-                        className="flex gap-6 overflow-x-auto pb-2"
+                        className="flex gap-5 overflow-x-auto pb-3"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollSnapType: 'x mandatory' }}
                     >
-                        {loading && blogs.length === 0 ? (
-                           <div className="col-span-full py-12 text-center text-gray-500 w-full animate-pulse font-medium flex items-center justify-center gap-2">
-                                <span className="material-symbols-outlined animate-spin text-xl text-[#7a29c2]">sync</span>
-                                Syncing Latest Insights...
-                           </div>
+                        {loading ? (
+                            Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
                         ) : blogs.length === 0 ? (
-                           <div className="col-span-full py-12 text-center text-gray-400 w-full italic">Stay tuned! Exciting new insights and study abroad guides are being curated for you.</div>
+                            <div className="w-full py-16 text-center text-gray-400 italic text-sm">
+                                Fresh insights are being curated. Check back soon!
+                            </div>
                         ) : (
                             blogs.map((blog, i) => (
-                                <article
+                                <BlogCard
                                     key={blog.slug}
-                                    data-card
-                                    onClick={() => navigate(`/blog/${blog.slug}`)}
-                                    className={`
-                                        flex-none w-[82vw] sm:w-[340px] lg:w-[300px] xl:w-[calc(20%-20px)]
-                                        rounded-[22px] border border-gray-100 bg-white
-                                        shadow-sm hover:shadow-2xl hover:shadow-purple-100/50 hover:-translate-y-2
-                                        transition-all duration-300 cursor-pointer overflow-hidden group
-                                        flex flex-col
-                                        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
-                                    `}
-                                    style={{ transitionDelay: `${i * 80}ms`, scrollSnapAlign: 'start' }}
-                                >
-                                    {/* ── Top Panel ── */}
-                                    <BlogHomePanel blog={blog} />
-    
-                                    {/* ── Content ── */}
-                                    <div className="flex flex-col gap-3 p-5 flex-1">
-                                        <h3 className="text-[14.5px] font-extrabold text-gray-900 leading-snug m-0 line-clamp-2 group-hover:text-[#7a29c2] transition-colors duration-200">
-                                            {blog.title}
-                                        </h3>
-    
-                                        <p className="text-[13px] text-gray-400 leading-relaxed m-0 line-clamp-3 flex-1">
-                                            {blog.excerpt}
-                                        </p>
-    
-                                        {/* Footer */}
-                                        <div className="pt-3 border-t border-gray-50 flex items-center justify-between mt-auto">
-                                            <span className="flex items-center gap-1 text-[12px] font-bold text-[#7a29c2] group-hover:gap-2 transition-all duration-200">
-                                                Read Article
-                                                <span className="material-symbols-outlined text-[14px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                                            </span>
-                                            <div className="flex items-center gap-1 text-gray-300">
-                                                <span className="material-symbols-outlined text-[15px]">person</span>
-                                                <span className="text-[10px] font-semibold uppercase tracking-wide">EAOverseas</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </article>
+                                    blog={blog}
+                                    index={i}
+                                    isVisible={isVisible}
+                                />
                             ))
                         )}
                     </div>
                 </div>
 
                 {/* ─── Dots + Mobile CTA ─── */}
-                <div className="flex flex-col items-center gap-5 mt-7">
-                    {/* Dot indicators */}
+                <div className="flex flex-col items-center gap-5 mt-8">
                     {blogs.length > 0 && (
-                        <div className="flex gap-2 flex-wrap justify-center">
+                        <div className="flex items-center gap-2">
                             {blogs.map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => scrollTo(i)}
-                                    className={`rounded-full transition-all duration-300 ${i === activeIdx ? 'w-6 h-2 bg-[#7a29c2]' : 'w-2 h-2 bg-gray-200 hover:bg-purple-200'}`}
                                     aria-label={`Go to slide ${i + 1}`}
+                                    className={`rounded-full transition-all duration-300 ${
+                                        i === activeIdx
+                                            ? 'w-6 h-2 bg-purple-600'
+                                            : 'w-2 h-2 bg-gray-200 hover:bg-purple-200'
+                                    }`}
                                 />
                             ))}
                         </div>
                     )}
-
-                    {/* Mobile CTA */}
                     <button
                         onClick={() => navigate('/blogs')}
-                        className="sm:hidden inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-[#7a29c2] to-[#9333ea] text-white text-sm font-bold rounded-full shadow-lg shadow-purple-200"
+                        className="sm:hidden inline-flex items-center gap-2 px-7 py-3 bg-gradient-to-r from-purple-700 to-violet-500 text-white text-sm font-extrabold rounded-full shadow-lg shadow-purple-200/60"
                     >
-                        <span className="material-symbols-outlined text-[17px]">auto_stories</span>
+                        <span className="material-symbols-outlined text-[16px]">auto_stories</span>
                         View All Articles
                     </button>
                 </div>

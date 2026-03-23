@@ -16,31 +16,8 @@ import { generalLimiter } from './middleware/rateLimiter';
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
-const PORT = process.env.PORT || 5000;
 
-import feedRoutes from './routes/feed.routes';
-import scraperRoutes from './routes/scraper.routes';
-import chatRoutes from './routes/chat.routes';
-import authRoutes from './routes/auth.routes';
-import universityRoutes from './routes/university.routes';
-import applicationRoutes from './routes/application.routes';
-import inquiryRoutes from './routes/inquiry.routes';
-import externalRoutes from './routes/externalRoutes';
-
-// ── Security Middleware ──────────────────────────────────────────────────────
-app.use(helmet());
-app.use(mongoSanitize());
-app.use(cookieParser());
-app.use(generalLimiter);
-
-// CORS — allow frontend origins
+// ── Critical Global Middleware (Must be BEFORE routes) ──────────────────────
 app.use(cors({
     origin: [
         'http://localhost:5173',
@@ -56,6 +33,40 @@ app.use(cors({
     ].filter(Boolean),
     credentials: true,
 }));
+app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+const PORT = process.env.PORT || 5000;
+
+import externalRoutes from './routes/externalRoutes';
+
+// ── Absolute Priority Routes ────────────────────────────────────────────────
+app.use('/api/v1', externalRoutes);
+app.use('/api/external', externalRoutes);
+app.get('/api/test-blogs', (req, res) => res.json({ success: true, message: 'Institutional Test Route Active' }));
+
+import feedRoutes from './routes/feed.routes';
+import scraperRoutes from './routes/scraper.routes';
+import chatRoutes from './routes/chat.routes';
+import authRoutes from './routes/auth.routes';
+import universityRoutes from './routes/university.routes';
+import applicationRoutes from './routes/application.routes';
+import inquiryRoutes from './routes/inquiry.routes';
+
+// ── Security Middleware ──────────────────────────────────────────────────────
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(mongoSanitize());
+
+app.use(generalLimiter);
+
+app.use(express.json({ limit: '10mb' }));
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -73,10 +84,13 @@ app.use('/api/scraper', scraperRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/inquiries', inquiryRoutes);
-app.use('/api/external', externalRoutes);
+
+// Already mounted above for precedence
+// app.use('/api/external', externalRoutes);
+// app.use('/api/v1', externalRoutes);
 
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', message: 'API is running' });
+    res.status(200).json({ status: 'ok', message: 'API is running - Institutional Portal VERIFIED v2' });
 });
 
 // ── Error Handling Middleware ────────────────────────────────────────────────
@@ -137,6 +151,8 @@ io.on('connection', (socket) => {
 
 // ── Database and Server ──────────────────────────────────────────────────────
 connectDB().then(() => {
+    logger.info('Institutional Database Link Established');
+    console.log('Routes mounted: /api/v1, /api/external');
     server.listen(PORT, () => {
         logger.info(`Server running on port ${PORT}`);
     });

@@ -1,7 +1,5 @@
 import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import universityImg from '@/features/landing/assets/university_modern_building.png';
 
@@ -317,7 +315,7 @@ const CountryDetails = () => {
         }
 
         // Use fallback but override name if known
-        const fallback = { ...countryData['default'] };
+        const fallback = { ...countryData['default'], flag: '' };
         if (countryNames[countryCode]) {
             fallback.name = countryNames[countryCode];
         }
@@ -332,14 +330,11 @@ const CountryDetails = () => {
 
 
     return (
-        <div className="flex flex-col min-h-screen bg-white text-[#111218] transition-colors duration-300 font-display" >
-            <Navbar />
-
-            <main className="max-w-[1200px] mx-auto w-full px-4 md:px-6 py-4 md:py-10 flex-grow">
+        <div className="max-w-[1200px] mx-auto w-full px-4 md:px-6 py-4 md:py-10 flex-grow">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="inline-flex items-center gap-1 md:gap-2 text-slate-500 hover:text-[#2463eb] transition-colors mb-4 md:mb-8 font-medium group text-sm md:text-base"
+                    className="inline-flex items-center gap-1 md:gap-2 text-slate-500 hover:text-[#7a29c2] transition-colors mb-4 md:mb-8 font-medium group text-sm md:text-base"
                 >
                     <span className="material-symbols-outlined text-lg md:text-2xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
                     Back
@@ -348,7 +343,7 @@ const CountryDetails = () => {
                 {/* Hero Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-12 items-center mb-6 md:mb-12">
                     <div className="lg:col-span-3 flex flex-col gap-3 md:gap-6">
-                        <div className="inline-flex items-center gap-2 md:gap-3 bg-[#2463eb]/10 text-[#2463eb] px-3 py-1.5 md:px-4 md:py-2 rounded-full w-fit">
+                        <div className="inline-flex items-center gap-2 md:gap-3 bg-[#7a29c2]/10 text-[#7a29c2] px-3 py-1.5 md:px-4 md:py-2 rounded-full w-fit">
                             <img
                                 src={`https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`}
                                 alt={`${country.name} Flag`}
@@ -357,7 +352,7 @@ const CountryDetails = () => {
                             <span className="text-xs md:text-sm font-bold uppercase tracking-wider">{country.name}</span>
                         </div>
                         <h1 className="text-3xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-[-0.033em]">
-                            Study in {country.name}: <span className="text-[#2463eb]">{country.tagline}</span>
+                            Study in {country.name}: <span className="text-[#7a29c2]">{country.tagline}</span>
                         </h1>
                         <p className="text-sm md:text-lg text-slate-600 leading-relaxed max-w-2xl">
                             {country.description}
@@ -365,7 +360,7 @@ const CountryDetails = () => {
                         <div className="flex gap-4">
                             <button
                                 onClick={handleExplore}
-                                className="bg-[#193ce6] text-white font-bold py-3 px-6 md:py-4 md:px-8 rounded-xl flex items-center gap-2 shadow-lg shadow-[#193ce6]/20 hover:opacity-90 transition-opacity text-sm md:text-base"
+                                className="bg-[#7a29c2] text-white font-bold py-3 px-6 md:py-4 md:px-8 rounded-xl flex items-center gap-2 shadow-lg shadow-[#7a29c2]/20 hover:opacity-90 transition-opacity text-sm md:text-base"
                             >
                                 Explore Universities
                                 <span className="material-symbols-outlined text-lg md:text-2xl">arrow_forward</span>
@@ -393,7 +388,7 @@ const CountryDetails = () => {
                 <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-2xl p-2 mb-10 md:mb-20">
                     <div className="grid grid-cols-2 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-slate-100">
                         <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-4 p-4 md:p-6">
-                            <div className="size-10 md:size-12 rounded-full bg-[#2463eb]/10 flex items-center justify-center text-[#2463eb]">
+                            <div className="size-10 md:size-12 rounded-full bg-[#7a29c2]/10 flex items-center justify-center text-[#7a29c2]">
                                 <span className="material-symbols-outlined text-xl md:text-2xl">payments</span>
                             </div>
                             <div>
@@ -402,7 +397,7 @@ const CountryDetails = () => {
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-4 p-4 md:p-6">
-                            <div className="size-10 md:size-12 rounded-full bg-[#2463eb]/10 flex items-center justify-center text-[#2463eb]">
+                            <div className="size-10 md:size-12 rounded-full bg-[#7a29c2]/10 flex items-center justify-center text-[#7a29c2]">
                                 <span className="material-symbols-outlined text-xl md:text-2xl">home_work</span>
                             </div>
                             <div>
@@ -411,7 +406,7 @@ const CountryDetails = () => {
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-4 p-4 md:p-6">
-                            <div className="size-10 md:size-12 rounded-full bg-[#2463eb]/10 flex items-center justify-center text-[#2463eb]">
+                            <div className="size-10 md:size-12 rounded-full bg-[#7a29c2]/10 flex items-center justify-center text-[#7a29c2]">
                                 <span className="material-symbols-outlined text-xl md:text-2xl">work_history</span>
                             </div>
                             <div>
@@ -420,7 +415,7 @@ const CountryDetails = () => {
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-4 p-4 md:p-6">
-                            <div className="size-10 md:size-12 rounded-full bg-[#2463eb]/10 flex items-center justify-center text-[#2463eb]">
+                            <div className="size-10 md:size-12 rounded-full bg-[#7a29c2]/10 flex items-center justify-center text-[#7a29c2]">
                                 <span className="material-symbols-outlined text-xl md:text-2xl">card_membership</span>
                             </div>
                             <div>
@@ -429,7 +424,7 @@ const CountryDetails = () => {
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-4 p-4 md:p-6 col-span-2 md:col-span-1">
-                            <div className="size-10 md:size-12 rounded-full bg-[#2463eb]/10 flex items-center justify-center text-[#2463eb]">
+                            <div className="size-10 md:size-12 rounded-full bg-[#7a29c2]/10 flex items-center justify-center text-[#7a29c2]">
                                 <span className="material-symbols-outlined text-xl md:text-2xl">translate</span>
                             </div>
                             <div>
@@ -462,10 +457,10 @@ const CountryDetails = () => {
                             <div className="flex flex-col gap-2 md:gap-3">
                                 <div className="flex justify-between items-end">
                                     <p className="text-sm md:text-lg font-semibold">Accommodation</p>
-                                    <p className="text-[#2463eb] font-bold text-sm md:text-base">{country.costs.accommodation.range}</p>
+                                    <p className="text-[#7a29c2] font-bold text-sm md:text-base">{country.costs.accommodation.range}</p>
                                 </div>
                                 <div className="h-1.5 md:h-3 bg-slate-100 rounded-full overflow-hidden relative">
-                                    <div className="absolute left-0 h-full bg-[#2463eb] rounded-full" style={{ width: `${country.costs.accommodation.percentage}%` }}></div>
+                                    <div className="absolute left-0 h-full bg-[#7a29c2] rounded-full" style={{ width: `${country.costs.accommodation.percentage}%` }}></div>
                                 </div>
                                 <p className="text-[10px] md:text-sm text-slate-500">{country.costs.accommodation.label}</p>
                             </div>
@@ -484,10 +479,10 @@ const CountryDetails = () => {
                             <div className="flex flex-col gap-2 md:gap-3">
                                 <div className="flex justify-between items-end">
                                     <p className="text-sm md:text-lg font-semibold">Public Transport</p>
-                                    <p className="text-[#2463eb] font-bold text-sm md:text-base">{country.costs.transport.range}</p>
+                                    <p className="text-[#7a29c2] font-bold text-sm md:text-base">{country.costs.transport.range}</p>
                                 </div>
                                 <div className="h-1.5 md:h-3 bg-slate-100 rounded-full overflow-hidden relative">
-                                    <div className="absolute left-0 h-full bg-[#2463eb] rounded-full" style={{ width: `${country.costs.transport.percentage}%` }}></div>
+                                    <div className="absolute left-0 h-full bg-[#7a29c2] rounded-full" style={{ width: `${country.costs.transport.percentage}%` }}></div>
                                 </div>
                                 <p className="text-[10px] md:text-sm text-slate-500">{country.costs.transport.label}</p>
                             </div>
@@ -504,8 +499,8 @@ const CountryDetails = () => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
                         {country.studentLife.map((item, index) => (
-                            <div key={index} className="group p-4 md:p-8 rounded-2xl bg-white border border-slate-100 hover:border-[#2463eb] transition-all duration-300">
-                                <div className="size-10 md:size-14 rounded-xl bg-[#2463eb] text-white flex items-center justify-center mb-4 md:mb-6 shadow-lg shadow-[#2463eb]/30 group-hover:-translate-y-1 transition-transform">
+                            <div key={index} className="group p-4 md:p-8 rounded-2xl bg-white border border-slate-100 hover:border-[#7a29c2] transition-all duration-300">
+                                <div className="size-10 md:size-14 rounded-xl bg-[#7a29c2] text-white flex items-center justify-center mb-4 md:mb-6 shadow-lg shadow-purple-600/30 group-hover:-translate-y-1 transition-transform">
                                     <span className="material-symbols-outlined text-xl md:text-3xl">{item.icon}</span>
                                 </div>
                                 <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3">{item.title}</h3>
@@ -518,7 +513,7 @@ const CountryDetails = () => {
                 {/* Work & Career */}
                 {/* Work & Career */}
                 <section className="mb-10 md:mb-20">
-                    <div className="bg-[#193ce6] rounded-2xl md:rounded-[2rem] p-6 md:p-12 text-white overflow-hidden relative">
+                    <div className="bg-[#7a29c2] rounded-2xl md:rounded-[2rem] p-6 md:p-12 text-white overflow-hidden relative">
                         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
                             <div className="w-full h-full bg-contain bg-right bg-no-repeat" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDdPJRZUjKmjb8MwGxYkoDUsmVQnjC6_gitGiWN152X5SyYbcqikv44yC_57Pi6D8tWaof4umn88CeM76XFN0uStCPgIPwjeOATpHqLZrSx7t-g5GUomL1Jak6Z_VlVKoHjE9xgXQ6D8WcffMpQp0lU0-78HBtThV6CWWz1dgKCo8t3iBL4pFWa3n4Tb8rVzLHdHz-ueHJJjZezNRTKOVWvO6jW_6GBCKOiHCZ8EIG3X7RjbtTsU-INGFHID4IZfT95WM_bqQPniD0")' }}></div>
                         </div>
@@ -535,17 +530,17 @@ const CountryDetails = () => {
                             </div>
                             <div className="flex-1">
                                 <div className="bg-white text-[#111218] rounded-xl md:rounded-2xl p-5 md:p-8 flex flex-col gap-3 md:gap-4">
-                                    <h4 className="text-lg md:text-xl font-bold mb-1 md:mb-2 text-[#2463eb]">Top Industries for Students</h4>
+                                    <h4 className="text-lg md:text-xl font-bold mb-1 md:mb-2 text-[#7a29c2]">Top Industries for Students</h4>
                                     {['Technology & Fintech', 'Healthcare & Bio-Sciences', 'Renewable Energy', 'Creative Arts & Media'].map((industry, i) => (
                                         <div key={i} className="flex items-center gap-2 md:gap-3 py-2 md:py-3 border-b border-slate-100">
-                                            <span className="material-symbols-outlined text-[#2463eb] font-bold text-lg md:text-2xl">check_circle</span>
+                                            <span className="material-symbols-outlined text-[#7a29c2] font-bold text-lg md:text-2xl">check_circle</span>
                                             <span className="font-medium text-xs md:text-base">{industry}</span>
                                         </div>
                                     ))}
 
                                     <div className="mt-2 md:mt-4 p-3 md:p-4 bg-slate-50 rounded-xl">
                                         <p className="text-[10px] md:text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Min. Wage (Estimated)</p>
-                                        <p className="text-xl md:text-2xl font-black text-[#2463eb]">Competitive Rates</p>
+                                        <p className="text-xl md:text-2xl font-black text-[#7a29c2]">Competitive Rates</p>
                                     </div>
                                 </div>
                             </div>
@@ -572,7 +567,7 @@ const CountryDetails = () => {
                                             src={uni.image || universityImg}
                                             alt={uni.name}
                                             className="w-full h-full object-cover"
-                                            onError={(e) => { e.target.src = universityImg; }}
+                                            onError={(e) => { (e.target as HTMLImageElement).src = universityImg; }}
                                         />
                                     </div>
                                     <span className="font-bold text-sm md:text-xl text-[#111218] whitespace-nowrap">{uni.name}</span>
@@ -583,14 +578,14 @@ const CountryDetails = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                         <div className="bg-[#f6f6f8] p-5 md:p-8 rounded-2xl">
                             <h4 className="text-lg md:text-xl font-bold mb-2 md:mb-4 flex items-center gap-2 md:gap-3">
-                                <span className="material-symbols-outlined text-[#2463eb] text-xl md:text-2xl">school</span>
+                                <span className="material-symbols-outlined text-[#7a29c2] text-xl md:text-2xl">school</span>
                                 Research Intensive
                             </h4>
                             <p className="text-slate-600 text-xs md:text-base">World-class universities committed to maintaining the highest standards of research and education.</p>
                         </div>
                         <div className="bg-[#f6f6f8] p-5 md:p-8 rounded-2xl">
                             <h4 className="text-lg md:text-xl font-bold mb-2 md:mb-4 flex items-center gap-2 md:gap-3">
-                                <span className="material-symbols-outlined text-[#2463eb] text-xl md:text-2xl">engineering</span>
+                                <span className="material-symbols-outlined text-[#7a29c2] text-xl md:text-2xl">engineering</span>
                                 Modern Universities
                             </h4>
                             <p className="text-slate-600 text-xs md:text-base">Focused on industry links and employability, offering practical, career-oriented degrees.</p>
@@ -601,16 +596,16 @@ const CountryDetails = () => {
                 {/* CTA Section */}
                 {/* CTA Section */}
                 <section className="py-10 md:py-20 flex flex-col items-center justify-center px-4">
-                    <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl text-center max-w-4xl w-full border border-blue-50 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl text-center max-w-4xl w-full border border-purple-50 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
 
                         {/* Interactive Background Elements */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-blue-100/50 transition-colors duration-500"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-50/50 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl group-hover:bg-indigo-100/50 transition-colors duration-500"></div>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-fuchsia-50/50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-fuchsia-100/50 transition-colors duration-500"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-50/50 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl group-hover:bg-purple-100/50 transition-colors duration-500"></div>
 
                         <div className="relative z-10">
-                            <span className="inline-block py-1 px-3 rounded-full bg-blue-100 text-[#193ce6] text-xs font-bold mb-4 tracking-wide uppercase">Free Expert Guidance</span>
+                            <span className="inline-block py-1 px-3 rounded-full bg-purple-100 text-[#7a29c2] text-xs font-bold mb-4 tracking-wide uppercase">Free Expert Guidance</span>
                             <h3 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 tracking-tight text-slate-900 leading-tight">
-                                Ready to start your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#193ce6] to-[#4f46e5]">study abroad journey</span>?
+                                Ready to start your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7a29c2] to-violet-600">study abroad journey</span>?
                             </h3>
                             <p className="text-slate-600 mb-8 md:mb-10 text-base md:text-lg mx-auto max-w-2xl leading-relaxed">
                                 Get personalized university recommendations, scholarship alerts, and visa guidance from our expert consultants - completely free.
@@ -618,7 +613,7 @@ const CountryDetails = () => {
                             <div className="flex justify-center">
                                 <button
                                     onClick={() => user ? navigate('/consultant') : navigate('/login', { state: { from: '/consultant' } })}
-                                    className="bg-[#193ce6] text-white font-bold py-4 px-10 rounded-xl text-lg shadow-xl shadow-blue-600/20 hover:bg-[#132db0] hover:shadow-blue-600/30 hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
+                                    className="bg-[#7a29c2] text-white font-bold py-4 px-10 rounded-xl text-lg shadow-xl shadow-purple-600/20 hover:bg-purple-700 hover:shadow-purple-600/30 hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
                                 >
                                     Book Free Consultation
                                     <span className="material-symbols-outlined text-xl">arrow_forward</span>
@@ -629,8 +624,6 @@ const CountryDetails = () => {
                     </div>
                 </section>
 
-            </main >
-            <Footer />
         </div >
     );
 };

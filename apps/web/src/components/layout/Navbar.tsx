@@ -53,7 +53,7 @@ const Navbar = () => {
         { name: 'Countries', path: '/countries', hasDropdown: true },
         { name: 'Blogs', path: '/blogs' },
         { name: 'Community', path: 'https://student.eaoverseas.com', external: true },
-        { name: 'Reviews', sectionId: 'reviews' },
+        { name: 'Contact Us', path: '/contact' },
         { name: 'Our Experts', sectionId: 'our-experts' },
         { name: 'FAQ', sectionId: 'faq' },
     ];
@@ -181,10 +181,10 @@ const Navbar = () => {
                         </span>
                     </button>
 
-                    {/* Join Community Button → external student portal */}
+                    {/* Join Community Button → external student portal (Hidden on mobile to save space) */}
                     <button
                         onClick={() => window.open('https://student.eaoverseas.com', '_blank', 'noopener,noreferrer')}
-                        className="group relative flex items-center justify-center px-5 py-2.5 rounded-xl border border-white/30 shadow-[0px_4px_20px_rgba(88,28,135,0.4)] hover:shadow-[0px_6px_25px_rgba(88,28,135,0.6)] transition-all hover:scale-105 active:scale-95"
+                        className="group relative hidden lg:flex items-center justify-center px-5 py-2.5 rounded-xl border border-white/30 shadow-[0px_4px_20px_rgba(88,28,135,0.4)] hover:shadow-[0px_6px_25px_rgba(88,28,135,0.6)] transition-all hover:scale-105 active:scale-95"
                         style={{ background: 'linear-gradient(212deg, rgba(124,58,237,0.4) 0%, rgba(88,28,135,0.9) 54%, rgba(124,58,237,0.4) 100%)' }}
                     >
                         <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-transparent to-white/20 pointer-events-none" />
@@ -280,6 +280,15 @@ const Navbar = () => {
                     ))}
 
                     <div className="pt-4 mt-2 border-t border-gray-100 flex flex-col gap-3">
+                        {/* Mobile Join Community */}
+                        <button
+                            onClick={() => window.open('https://student.eaoverseas.com', '_blank', 'noopener,noreferrer')}
+                            className="w-full bg-[#7a29c2] text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-purple-200"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">groups</span>
+                            Join Community
+                        </button>
+
                         {/* Mobile Check Eligibility */}
                         <button
                             onClick={() => { navigate('/contact'); setIsMobileMenuOpen(false); }}

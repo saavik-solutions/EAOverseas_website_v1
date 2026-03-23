@@ -122,12 +122,14 @@ const DestinationsSection: React.FC = () => {
                             >
                                 <div className="relative shrink-0 p-2 pt-2">
                                     <img 
-                                        src={uni.image} 
+                                        src={uni.image || logo} 
                                         alt={uni.name} 
                                         onError={(e) => {
-                                            (e.target as HTMLImageElement).src = logo;
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = logo;
+                                            target.className = "w-full h-[200px] max-sm:h-[160px] object-contain p-8 bg-white/30 rounded-[16px] block group-hover:scale-[1.02] transition-transform duration-500";
                                         }}
-                                        className="w-full h-[200px] max-sm:h-[160px] object-cover rounded-[16px] block group-hover:scale-[1.02] transition-transform duration-500" 
+                                        className={`w-full h-[200px] max-sm:h-[160px] rounded-[16px] block group-hover:scale-[1.02] transition-transform duration-500 ${!uni.image ? 'object-contain p-8 bg-white/30' : 'object-cover'}`} 
                                     />
                                     <div className="absolute top-[18px] left-[18px] inline-flex items-center gap-1 bg-black/60 backdrop-blur-sm text-[#FFD700] text-[11px] font-bold py-1 px-2 rounded-full tracking-wide">
                                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">

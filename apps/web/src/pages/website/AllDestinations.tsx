@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-
 const AllDestinations = () => {
     const navigate = useNavigate();
     // Mock Data for Destinations
@@ -64,10 +61,7 @@ const AllDestinations = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-white font-sans text-[#111418]">
-            <Navbar />
-
-            <main className="w-full">
+        <div className="w-full">
                 {/* Header Section */}
                 <div className="max-w-[1280px] mx-auto px-4 md:px-12 pt-4 md:pt-8 pb-4 md:pb-8">
                     {/* Back Button */}
@@ -144,9 +138,6 @@ const AllDestinations = () => {
                         </div>
                     </div>
                 </div>
-            </main>
-
-            <Footer />
         </div>
     );
 };
