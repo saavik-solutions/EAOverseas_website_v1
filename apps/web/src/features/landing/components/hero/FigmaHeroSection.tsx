@@ -18,7 +18,7 @@ const FigmaHeroSection: React.FC = () => {
       <div className="absolute top-[30%] right-[-10%] w-[50%] h-[50%] bg-[#9500e5] blur-[150px] opacity-20 rounded-full animate-pulse pointer-events-none" style={{ animationDuration: '6s' }} />
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-start md:justify-center text-center gap-6 md:gap-10 px-4 pt-28 md:pt-0 max-w-[1200px] mx-auto w-full min-h-screen md:min-h-fit">
+      <div className="relative z-10 flex flex-col items-center justify-start md:justify-center text-center gap-6 md:gap-10 px-4 pt-32 md:pt-40 max-w-[1200px] mx-auto w-full min-h-screen md:min-h-fit">
         
         {/* Huge Heading */}
         <h1 className="flex flex-col font-medium leading-[1.05] tracking-tight drop-shadow-2xl">

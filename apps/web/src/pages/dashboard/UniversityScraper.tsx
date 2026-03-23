@@ -21,6 +21,8 @@ const DATA_FIELDS = [
 
 const UniversityScraper = () => {
     const { accessToken } = useAuth();
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
     const [selectedSource, setSelectedSource] = useState(SOURCES[0].id);
     const [customUrl, setCustomUrl] = useState('');
     const [isScraping, setIsScraping] = useState(false);
@@ -65,7 +67,8 @@ const UniversityScraper = () => {
         addLog(`Initiating engine for ${selectedSource === 'custom' ? customUrl : selectedSource.toUpperCase()}...`);
 
         try {
-            const response = await fetch('http://localhost:3001/api/scraper/start', {
+            const response = await fetch(`${API_BASE}/api/scraper/start`, {
+
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,7 +91,8 @@ const UniversityScraper = () => {
             // Start polling for status
             const pollInterval = setInterval(async () => {
                 try {
-                    const statusRes = await fetch(`http://localhost:3001/api/scraper/status/${jobId}`, {
+                    const statusRes = await fetch(`${API_BASE}/api/scraper/status/${jobId}`, {
+
                         headers: { 'Authorization': `Bearer ${accessToken}` }
                     });
                     if (!statusRes.ok) return;
