@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import universityImg from '@/assets/university_modern_building.png';
 import orbitGraphic from '@/features/landing/assets/destinations_orbit_graphic.png';
-import historicCampus from '@/assets/university_historic_campus.png';
-import modernGlass from '@/assets/university_modern_glass.png';
-import greenCampus from '@/assets/university_green_campus.png';
-import classicHall from '@/assets/university_classic_hall.png';
 import logo from '@/assets/logo.png';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
 
 type CountryKey = 'Netherlands' | 'UK' | 'USA' | 'Canada' | 'Ireland';
 
@@ -121,15 +117,11 @@ const DestinationsSection: React.FC = () => {
                                 style={{ animationDelay: `${index * 0.05}s` }}
                             >
                                 <div className="relative shrink-0 p-2 pt-2">
-                                    <img 
+                                    <ImageWithFallback 
                                         src={uni.image || logo} 
                                         alt={uni.name} 
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.src = logo;
-                                            target.className = "w-full h-[200px] max-sm:h-[160px] object-contain p-8 bg-white/30 rounded-[16px] block group-hover:scale-[1.02] transition-transform duration-500";
-                                        }}
                                         className={`w-full h-[200px] max-sm:h-[160px] rounded-[16px] block group-hover:scale-[1.02] transition-transform duration-500 ${!uni.image ? 'object-contain p-8 bg-white/30' : 'object-cover'}`} 
+                                        fallbackContainerClassName="w-full h-[200px] max-sm:h-[160px] rounded-[16px]"
                                     />
                                     <div className="absolute top-[18px] left-[18px] inline-flex items-center gap-1 bg-black/60 backdrop-blur-sm text-[#FFD700] text-[11px] font-bold py-1 px-2 rounded-full tracking-wide">
                                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">

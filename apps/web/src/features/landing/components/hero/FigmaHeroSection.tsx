@@ -61,48 +61,7 @@ const FigmaHeroSection: React.FC = () => {
           </div>
         </div>
         
-        {/* Mobile Highlight Cards (Filled Content for Mobile) */}
-        <div className="flex md:hidden w-full overflow-x-auto pb-4 gap-4 no-scrollbar mt-6 mb-10 scroll-smooth">
-          <div className="flex-shrink-0 w-[240px] p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-            <div className="size-10 rounded-xl bg-[#7a29c2]/30 flex items-center justify-center mb-4">
-              <span className="material-symbols-outlined text-white text-xl">auto_awesome</span>
-            </div>
-            <h3 className="text-white font-bold text-lg mb-2">Expert AI Guidance</h3>
-            <p className="text-white/70 text-sm leading-relaxed">Personalized roadmap for your dream university.</p>
-          </div>
 
-          <div className="flex-shrink-0 w-[240px] p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-            <div className="size-10 rounded-xl bg-[#f97316]/30 flex items-center justify-center mb-4">
-              <span className="material-symbols-outlined text-white text-xl">public</span>
-            </div>
-            <h3 className="text-white font-bold text-lg mb-2">100+ Destinations</h3>
-            <p className="text-white/70 text-sm leading-relaxed">Explore opportunities across the globe.</p>
-          </div>
-
-          <div className="flex-shrink-0 w-[240px] p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
-            <div className="size-10 rounded-xl bg-blue-500/30 flex items-center justify-center mb-4">
-              <span className="material-symbols-outlined text-white text-xl">groups</span>
-            </div>
-            <h3 className="text-white font-bold text-lg mb-2">Global Community</h3>
-            <p className="text-white/70 text-sm leading-relaxed">Join thousands of successful students.</p>
-          </div>
-        </div>
-
-        {/* Desktop Mini Stats (Subtle) */}
-        <div className="hidden md:flex gap-12 mt-10">
-          <div className="flex flex-col items-center">
-            <span className="text-white text-4xl font-black">100+</span>
-            <span className="text-white/50 text-sm uppercase tracking-widest font-bold">Destinations</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-white text-4xl font-black">2.5k+</span>
-            <span className="text-white/50 text-sm uppercase tracking-widest font-bold">Admissions</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-white text-4xl font-black">100%</span>
-            <span className="text-white/50 text-sm uppercase tracking-widest font-bold">Visa Success</span>
-          </div>
-        </div>
 
       </div>
     </div>

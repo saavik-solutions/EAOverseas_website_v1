@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
 import styles from './StudentStoriesSection.module.css';
 // Adding Avneet card back as requested
 import avneetCard from '@/assets/story_card_avneet.png';
@@ -72,10 +73,11 @@ const StudentStoriesSection = () => {
                             <div className={`relative w-full h-full transition-transform duration-700 ${styles.transformStyle3d} ${styles.flipInner} cursor-pointer`}>
                                 {/* Front Face */}
                                 <div className={`absolute inset-0 ${styles.backfaceHidden} rounded-2xl overflow-hidden shadow-lg border border-gray-100`}>
-                                    <img
+                                    <ImageWithFallback
                                         src={story.image}
                                         alt={story.name}
                                         className="w-full h-full object-cover rounded-2xl"
+                                        fallbackContainerClassName="w-full h-full rounded-2xl"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                         <h3 className="text-xl font-bold">{story.name}</h3>

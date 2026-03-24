@@ -49,14 +49,14 @@ const ImageWithFallback: React.FC<Props> = ({
     // Logo-over-purple-background placeholder
     return (
       <div
-        className={`flex items-center justify-center bg-gradient-to-br from-purple-50 to-fuchsia-50 ${fallbackContainerClassName ?? ''}`}
+        className={`flex items-center justify-center bg-gradient-to-br from-purple-100 to-fuchsia-100 ${fallbackContainerClassName ?? ''}`}
         style={style}
         aria-label={alt}
       >
         <img
           src={logo}
           alt="EAOverseas"
-          className="h-10 w-auto object-contain opacity-50"
+          className="h-16 w-auto object-contain"
           style={{ filter: 'brightness(0) saturate(100%) invert(18%) sepia(96%) saturate(2000%) hue-rotate(272deg) brightness(80%)' }}
         />
       </div>

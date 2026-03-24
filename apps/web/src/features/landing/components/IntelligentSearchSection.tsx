@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo.png';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -498,12 +499,9 @@ const IntelligentSearchSection = () => {
                                     }`}
                                 >
                                     <div className="h-28 relative overflow-hidden">
-                                        <img 
+                                        <ImageWithFallback 
                                             src={uni.img} 
                                             alt={uni.name} 
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = logo;
-                                            }}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-purple-950/80 to-purple-900/10"></div>
@@ -589,12 +587,9 @@ const IntelligentSearchSection = () => {
                                                 className="cursor-pointer bg-white rounded-2xl border border-purple-100 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-purple-100 transition-all group flex flex-col hover:-translate-y-1"
                                             >
                                                 <div className="h-24 relative overflow-hidden">
-                                                    <img 
+                                                    <ImageWithFallback 
                                                         src={uni.img} 
                                                         alt={uni.name} 
-                                                        onError={(e) => {
-                                                            (e.target as HTMLImageElement).src = logo;
-                                                        }}
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                                                     />
                                                     <div className="absolute inset-0 bg-gradient-to-t from-purple-950/70 to-transparent"></div>

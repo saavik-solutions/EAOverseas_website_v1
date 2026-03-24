@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '@/assets/logo.png';
 import { ExternalBlog, fetchExternalBlogs } from '@/services/blogService';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
 
 // ─── Deterministic Tag Color Mapping ─────────────────────────────────────────
 const TAG_COLORS = [
@@ -46,7 +47,6 @@ const SkeletonCard: React.FC = () => (
 // ─── Blog Card ────────────────────────────────────────────────────────────────
 const BlogCard: React.FC<{ blog: ExternalBlog; index: number; isVisible: boolean }> = ({ blog, index, isVisible }) => {
     const navigate = useNavigate();
-    const [imgError, setImgError] = useState(false);
     const tagColor = getTagColor(blog.slug);
     const tag = blog.tags && blog.tags.length > 0 ? blog.tags[0] : 'Insight';
 
@@ -65,26 +65,12 @@ const BlogCard: React.FC<{ blog: ExternalBlog; index: number; isVisible: boolean
         >
             {/* ── Image Panel ── */}
             <div className="relative h-[190px] overflow-hidden bg-gray-50 flex-shrink-0">
-                {blog.coverImage && !imgError ? (
-                    <img
-                        src={blog.coverImage}
-                        alt={blog.title}
-                        onError={() => setImgError(true)}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-700 via-violet-600 to-purple-900">
-                        {/* Grid overlay */}
-                        <div
-                            className="absolute inset-0 opacity-10"
-                            style={{
-                                backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
-                                backgroundSize: '28px 28px',
-                            }}
-                        />
-                        <img src={logo} alt="EAOverseas" className="relative z-10 h-20 w-auto object-contain drop-shadow-xl" style={{ filter: 'brightness(0) invert(1)' }} />
-                    </div>
-                )}
+                <ImageWithFallback
+                    src={blog.coverImage ?? ''}
+                    alt={blog.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fallbackContainerClassName="w-full h-full bg-gradient-to-br from-purple-700 via-violet-600 to-purple-900"
+                />
 
                 {/* Tag badge */}
                 <span className={`absolute top-3 left-3 ${tagColor} text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg shadow-md`}>

@@ -8,104 +8,98 @@ interface HeroCarouselProps {
 const HeroCarousel = ({ slides, interval = 5000 }: HeroCarouselProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
-    const [progress, setProgress] = useState(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleNext = useCallback(() => {
         setCurrentIndex((prev) => (prev + 1) % slides.length);
-        setProgress(0);
     }, [slides.length]);
 
     const handlePrev = useCallback(() => {
         setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
-        setProgress(0);
     }, [slides.length]);
 
     useEffect(() => {
         if (!isPaused) {
             timerRef.current = setInterval(handleNext, interval);
-            
-            const step = 100 / (interval / 100);
-            progressIntervalRef.current = setInterval(() => {
-                setProgress((prev) => Math.min(prev + step, 100));
-            }, 100);
         }
 
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
-            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
         };
     }, [handleNext, interval, isPaused]);
 
     const goToSlide = (index: number) => {
         setCurrentIndex(index);
-        setProgress(0);
     };
 
     return (
         <div 
-            className="w-full mx-auto p-0 overflow-hidden relative max-w-[1600px] bg-white group"
+            className="w-full mx-auto p-0 overflow-hidden relative max-w-[2000px] min-h-[600px] md:min-h-[750px] bg-white group"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
+            {/* Base Grid Background (Subtle for Enterprise look) */}
+            <div className="absolute inset-0 bg-grid-purple opacity-[0.06] pointer-events-none z-0" />
+
+            {/* Background Ambient Glows */}
+            <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-purple-100/20 blur-[140px] rounded-full pointer-events-none" />
+            
             {/* Slides Track */}
             <div 
-                className="flex w-full transition-transform duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform"
+                className="flex w-full h-full transition-transform duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform relative z-10"
                 style={{ 
                     transform: `translateX(-${currentIndex * 100}%)`,
                 }}
             >
                 {slides.map((slide, index) => (
-                    <div key={index} className="min-w-full box-border flex flex-col items-center justify-center pt-6 pb-16 px-8 max-md:py-8 max-md:px-4 min-h-[600px] max-md:min-h-[500px] relative">
-                        <div className="w-full flex justify-center items-center animate-[slideInUp_0.8s_cubic-bezier(0.4,0,0.2,1)_forwards]">
+                    <div key={index} className="min-w-full box-border flex flex-col items-center justify-center relative overflow-hidden">
+                        <div className={`w-full h-full transition-all duration-1000 ${currentIndex === index ? 'opacity-100' : 'opacity-0'}`}>
                             {slide}
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Navigation Arrows */}
+            {/* Executive Navigation Arrows */}
             <button 
                 onClick={handlePrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-40 size-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20 hover:scale-110 cursor-pointer"
+                className="absolute left-6 md:left-12 top-1/2 -translate-y-1/2 z-50 size-14 md:size-16 rounded-full bg-white/90 backdrop-blur-md border border-slate-100 text-slate-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
                 aria-label="Previous slide"
             >
-                <span className="material-symbols-outlined">arrow_back_ios_new</span>
+                <span className="material-symbols-outlined !text-2xl md:text-3xl font-light">west</span>
             </button>
             <button 
                 onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-40 size-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white/20 hover:scale-110 cursor-pointer"
+                className="absolute right-6 md:right-12 top-1/2 -translate-y-1/2 z-50 size-14 md:size-16 rounded-full bg-white/90 backdrop-blur-md border border-slate-100 text-slate-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white hover:scale-110 cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
                 aria-label="Next slide"
             >
-                <span className="material-symbols-outlined">arrow_forward_ios</span>
+                <span className="material-symbols-outlined !text-2xl md:text-3xl font-light">east</span>
             </button>
 
-            {/* Progress Bar & Indicators */}
-            <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-4">
-                <div className="flex gap-3">
+            {/* Indicators Section */}
+            <div className="absolute bottom-10 md:bottom-14 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
+                {/* Dot Indicators */}
+                <div className="flex gap-6">
                     {slides.map((_, index) => (
                         <button
                             key={index}
                             onClick={() => goToSlide(index)}
-                            className={`w-2 h-2 rounded-full bg-black/10 border-none cursor-pointer transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)] ${currentIndex === index ? 'bg-[#7a29c2] !w-8' : ''}`}
+                            className={`group relative py-2 border-none bg-transparent cursor-pointer`}
                             aria-label={`Go to slide ${index + 1}`}
-                        />
+                        >
+                            <div className={`h-1 rounded-full transition-all duration-500 ${currentIndex === index ? 'w-10 bg-slate-900' : 'w-4 bg-slate-200 group-hover:bg-slate-300'}`} />
+                        </button>
                     ))}
-                </div>
-                {/* Visual Progress Bar */}
-                <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
-                    <div 
-                        className="h-full bg-[#ffda6b] transition-[width] duration-100 ease-linear"
-                        style={{ width: `${progress}%` }}
-                    />
                 </div>
             </div>
             
             <style>{`
-                @keyframes slideInUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
+                @keyframes pulse-slow {
+                    0%, 100% { opacity: 0.2; transform: scale(1); }
+                    50% { opacity: 0.3; transform: scale(1.05); }
+                }
+                .material-symbols-outlined {
+                    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
                 }
             `}</style>
         </div>

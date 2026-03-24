@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '@/assets/logo.png';
+import ImageWithFallback from '@/components/common/ImageWithFallback';
 import { experts } from '../../../data/experts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -31,30 +33,7 @@ const CATEGORY_ICON: Record<string, string> = {
 
 // ─── Avatar with Initials Fallback ───────────────────────────────────────────
 
-const MemberAvatar: React.FC<{ src: string; name: string; color: string }> = ({ src, name, color }) => {
-    const [failed, setFailed] = useState(false);
-    const initials = getInitials(name);
-
-    if (failed) {
-        return (
-            <div
-                className="w-full h-full flex items-center justify-center text-white text-[48px] font-black"
-                style={{ background: `linear-gradient(135deg, ${color}, ${color}99)` }}
-            >
-                {initials}
-            </div>
-        );
-    }
-
-    return (
-        <img
-            src={src}
-            alt={name}
-            onError={() => setFailed(true)}
-            className="w-full h-full object-cover object-top"
-        />
-    );
-};
+// MemberAvatar is replaced by ImageWithFallback below
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -155,7 +134,12 @@ const TeamSection: React.FC = () => {
                                 <div className="relative h-[220px] overflow-hidden flex-shrink-0">
                                     {/* Photo (with initials fallback) */}
                                     <div className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 ease-out">
-                                        <MemberAvatar src={member.image} name={member.name} color={member.color} />
+                                        <ImageWithFallback 
+                                            src={member.image} 
+                                            alt={member.name} 
+                                            className="w-full h-full object-cover object-top"
+                                            fallbackContainerClassName="w-full h-full"
+                                        />
                                     </div>
 
                                     {/* Bottom gradient overlay */}

@@ -65,11 +65,11 @@ const Navbar = () => {
                     pointer-events-auto w-full max-w-[1400px] rounded-[19px] border shadow-xl
                     backdrop-blur-md backdrop-brightness-100 transition-all duration-300
                     ${isHero
-                        ? 'bg-[#f0f0f04c] border-white/40 shadow-[0px_10px_30px_rgba(0,0,0,0.05)]'
+                        ? 'bg-white/80 border-purple-100 shadow-[0px_10px_30px_rgba(122,41,194,0.08)]'
                         : 'bg-white/95 border-purple-100 shadow-2xl ' + (scrolled ? 'scale-[0.98]' : '')}
                 `}
                 style={{
-                    boxShadow: isHero ? '0px 4px 20px rgba(0,0,0,0.05)' : '0px 10px 30px rgba(122,41,194,0.12)'
+                    boxShadow: isHero ? '0px 4px 20px rgba(122,41,194,0.1)' : '0px 10px 30px rgba(122,41,194,0.12)'
                 }}
             >
 
@@ -86,11 +86,7 @@ const Navbar = () => {
                         src={logo} 
                         alt="EAOverseas" 
                         className="h-12 lg:h-14 w-auto object-contain transition-all duration-300 ease-in-out" 
-                        style={
-                            isHero
-                                ? { filter: 'none' }
-                                : { filter: 'brightness(0) saturate(100%) invert(19%) sepia(80%) saturate(6011%) hue-rotate(272deg) brightness(83%) contrast(98%)' }
-                        }
+                        style={{ filter: 'brightness(0) saturate(100%) invert(19%) sepia(80%) saturate(6011%) hue-rotate(272deg) brightness(83%) contrast(98%)' }}
                     />
                 </div>
 
@@ -115,8 +111,8 @@ const Navbar = () => {
                                     relative inline-flex items-center gap-0.5 px-3 py-2 rounded-lg
                                     text-[14px] font-semibold transition-all duration-200
                                     ${'path' in link && isActive(link.path!)
-                                        ? (isHero ? 'text-white bg-white/20' : 'text-[#7a29c2] bg-purple-50')
-                                        : (isHero ? 'text-white/90 hover:text-white hover:bg-white/10' : 'text-[#7a29c2]/80 hover:text-[#7a29c2] hover:bg-purple-50/60')}
+                                        ? 'text-[#7a29c2] bg-purple-50'
+                                        : 'text-[#7a29c2]/80 hover:text-[#7a29c2] hover:bg-purple-50/60'}
                                 `}
                             >
                                 {link.name}
@@ -198,7 +194,7 @@ const Navbar = () => {
                     <div className="lg:hidden">
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className={`p-2 transition-colors rounded-lg ${isHero ? 'text-white hover:text-white/80 hover:bg-white/10' : 'text-gray-700 hover:text-[#7a29c2] hover:bg-purple-50'}`}
+                            className="p-2 transition-colors rounded-lg text-gray-700 hover:text-[#7a29c2] hover:bg-purple-50"
                             aria-label="Toggle menu"
                         >
                             <span className="material-symbols-outlined text-[26px]">
