@@ -62,19 +62,11 @@ const AboutUs = () => {
     const { user } = useAuth();
 
     const handleExplore = () => {
-        if (user) {
-            navigate('/colleges');
-        } else {
-            navigate('/login', { state: { from: '/colleges' } });
-        }
+        window.location.href = 'https://student.eaoverseas.com';
     };
 
     const handleBrowseCourses = () => {
-        if (user) {
-            navigate('/courses');
-        } else {
-            navigate('/login', { state: { from: '/courses' } });
-        }
+        window.location.href = 'https://student.eaoverseas.com';
     };
 
     useEffect(() => {
