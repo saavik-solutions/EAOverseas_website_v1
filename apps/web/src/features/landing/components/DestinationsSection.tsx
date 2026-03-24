@@ -185,9 +185,6 @@ const DestinationsSection: React.FC = () => {
                 </div>
             </div>
 
-            <div className="absolute top-1/2 right-0 -translate-y-1/2 h-[90%] w-[36%] flex justify-end items-center pointer-events-none z-0 opacity-25 max-lg:hidden">
-                <img src={orbitGraphic} alt="Global Destinations" className="max-h-full w-auto object-contain -mr-[1px]" />
-            </div>
             
             <style>{`
                 @keyframes fadeInUp {

@@ -66,8 +66,8 @@ const LandingPage = () => {
                 <div className="w-full relative z-0">
                     <HeroCarousel 
                         slides={[
-                            <DestinationsSlide onBookingClick={() => setIsBookingModalOpen(true)} />,
                             <MainSlide onBookingClick={() => setIsBookingModalOpen(true)} />,
+                            <DestinationsSlide onBookingClick={() => setIsBookingModalOpen(true)} />,
                             <ScholarshipSlide onBookingClick={() => setIsBookingModalOpen(true)} />
                         ]} 
                         interval={6000}
