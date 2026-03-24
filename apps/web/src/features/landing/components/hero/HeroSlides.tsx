@@ -13,7 +13,7 @@ interface SlideProps {
 export const MainSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
   const navigate = useNavigate();
   return (
-    <div className="relative w-full min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-12 md:pt-40 md:pb-20">
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
       <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
         <div className="space-y-6 md:space-y-8 animate-fade-in-up">
           <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-500 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
@@ -23,7 +23,7 @@ export const MainSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
             </span>
             Executive Education Advisory
           </div>
-          <h1 className="text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.05] tracking-tight font-bricolage transition-all">
+          <h1 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage transition-all">
             Secure Your <br />
             <span className="text-[#7a29c2]">Global Future</span> <br />
             With Expert Guidance.
@@ -47,12 +47,12 @@ export const MainSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
             </button>
           </div>
         </div>
-        <div className="relative hidden lg:block animate-fade-in-right">
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
             <div className="relative z-10 group bg-slate-50 p-3 rounded-[3.5rem] border border-slate-100 shadow-inner">
                 <img 
                     src={heroSuccess} 
                     alt="Strategic Student Success" 
-                    className="relative w-full h-[500px] object-cover rounded-[3rem] grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
+                    className="relative w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
                 />
             </div>
             {/* Enterprise Stats Card */}
@@ -76,13 +76,13 @@ export const MainSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
 export const ScholarshipSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
   const navigate = useNavigate();
   return (
-    <div className="relative w-full min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-12 md:pt-40 md:pb-20">
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
       <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
         <div className="space-y-6 md:space-y-8 animate-fade-in-up">
           <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-[#7a29c2] font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
             Financial Strategy & Awards
           </div>
-          <h2 className="text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.05] tracking-tight font-bricolage">
+          <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
             Strategic <br />
             <span className="text-[#7a29c2]">Scholarship</span> <br />
             Advisory.
@@ -109,12 +109,12 @@ export const ScholarshipSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
             </div>
           </div>
         </div>
-        <div className="relative hidden lg:flex justify-end">
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
             <div className="relative p-3 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-inner group">
                 <img 
                     src={heroScholarship} 
-                    alt="Financial Advisory" 
-                    className="w-[450px] h-[500px] object-cover rounded-[3rem] grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700 shadow-2xl"
+                    alt="Strategic Scholarship" 
+                    className="relative w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700"
                 />
             </div>
         </div>
@@ -126,13 +126,13 @@ export const ScholarshipSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
 export const DestinationsSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
     const navigate = useNavigate();
     return (
-      <div className="relative w-full min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-12 md:pt-40 md:pb-20">
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
         <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
-          <div className="space-y-6 md:space-y-8 animate-fade-in-up">
+          <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-[#7a29c2] font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
                 Global Network Centers
             </div>
-            <h2 className="text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.05] tracking-tight font-bricolage">
+            <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
               Global <span className="text-purple-600">Hubs</span> <br />
               At Your <br />
               Command.
@@ -152,12 +152,12 @@ export const DestinationsSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
               Explore Network
             </button>
           </div>
-          <div className="relative hidden lg:flex justify-end">
+          <div className="relative flex justify-center lg:justify-end mt-8 lg:mt-0 order-1 lg:order-2">
             <div className="relative overflow-hidden group">
                 <img 
                     src={heroDestinations} 
                     alt="International Network" 
-                    className="w-[600px] h-[600px] object-contain grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700 shadow-2xl"
+                    className="w-[300px] sm:w-[450px] lg:w-[600px] h-auto object-contain grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700"
                 />
             </div>
           </div>

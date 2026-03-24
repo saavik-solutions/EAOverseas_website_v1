@@ -69,7 +69,8 @@ const Navbar = () => {
                         : 'bg-white/95 border-purple-100 shadow-2xl ' + (scrolled ? 'scale-[0.98]' : '')}
                 `}
                 style={{
-                    boxShadow: isHero ? '0px 4px 20px rgba(122,41,194,0.1)' : '0px 10px 30px rgba(122,41,194,0.12)'
+                    boxShadow: isHero ? '0px 4px 20px rgba(122,41,194,0.1)' : '0px 10px 30px rgba(122,41,194,0.12)',
+                    backdropFilter: 'blur(20px) saturate(180%)'
                 }}
             >
 
@@ -212,7 +213,7 @@ const Navbar = () => {
                     ${isMobileMenuOpen ? 'max-h-[600px] opacity-100 border-t border-gray-100 shadow-xl' : 'max-h-0 opacity-0'}
                 `}
             >
-                <div className="flex flex-col px-5 py-6 gap-1 bg-gray-50/40">
+                <div className="flex flex-col px-5 py-4 gap-0.5 bg-gray-50/40">
                     {navLinks.map((link) => (
                         <div key={link.name}>
                             <button
@@ -226,7 +227,7 @@ const Navbar = () => {
                                     }
                                 }}
                                 className={`
-                                    w-full text-left px-4 py-3 rounded-xl text-[15px] font-semibold transition-all flex items-center justify-between
+                                    w-full text-left px-4 py-2.5 rounded-xl text-[15px] font-semibold transition-all flex items-center justify-between
                                     ${'path' in link && isActive(link.path!)
                                         ? 'text-[#7a29c2] bg-purple-50'
                                         : 'text-gray-700 hover:text-[#7a29c2] hover:bg-purple-50/60'}

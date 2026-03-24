@@ -90,7 +90,7 @@ const AIChatWidget: React.FC = () => {
             <div className={`fixed z-[9999] transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1)
                 ${isFullView 
                     ? 'inset-0 md:p-12 lg:p-16 flex items-center justify-center p-0' 
-                    : 'bottom-6 md:bottom-8 right-[90px] md:right-[110px] flex flex-col items-end pointer-events-none'}`}>
+                    : 'bottom-4 right-[74px] md:bottom-8 md:right-[110px] flex flex-col items-end pointer-events-none'}`}>
 
                 {/* ── Executive AI Messenger ── */}
                 {isOpen && !isMinimized && (

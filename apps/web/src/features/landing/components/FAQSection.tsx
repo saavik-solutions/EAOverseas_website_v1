@@ -214,13 +214,13 @@ const FAQSection = () => {
                 className="w-[300px] h-[300px] object-cover object-top rounded-full shadow-lg border-4 border-white"
               />
 
-              {/* Speech Bubble popup — positioned in corner, not over the face */}
-              <div className="absolute -top-20 -left-28 bg-white rounded-[20px] p-5 shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-gray-100 w-[220px] transform -rotate-3 z-0 float-anim">
+              {/* Speech Bubble popup — responsive positioning */}
+              <div className="absolute -top-12 -left-12 md:-top-20 md:-left-28 bg-white rounded-[20px] p-4 md:p-5 shadow-[0_10px_40px_rgba(0,0,0,0.12)] border border-gray-100 w-[180px] md:w-[220px] transform -rotate-3 z-0 float-anim">
                 {/* Bubble Tail */}
                 <div className="absolute -bottom-3 right-10 w-8 h-8 bg-white transform rotate-45 border-b border-r border-gray-100" style={{ clipPath: 'polygon(100% 100%, 0 100%, 100% 0)' }}></div>
 
-                <p className="text-gray-600 text-[13px] font-medium mb-0.5">Got more questions?</p>
-                <h4 className="text-[#1e468a] font-bold text-xl mb-4">Let's Talk.</h4>
+                <p className="text-gray-600 text-[11px] md:text-[13px] font-medium mb-0.5">Got more questions?</p>
+                <h4 className="text-[#1e468a] font-bold text-lg md:text-xl mb-3 md:mb-4">Let's Talk.</h4>
 
                 <button
                   onClick={() => navigate('/contact')}

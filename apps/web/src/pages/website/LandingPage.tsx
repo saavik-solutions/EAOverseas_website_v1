@@ -117,7 +117,7 @@ const LandingPage = () => {
                 <img
                     src={whatsappIcon}
                     alt="Chat on WhatsApp"
-                    className="w-14 h-14 md:w-16 md:h-16 object-contain drop-shadow-lg hover:drop-shadow-xl"
+                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain drop-shadow-lg hover:drop-shadow-xl"
                 />
             </a>
 
