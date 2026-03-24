@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { CONTACTS } from '@/shared/constants/contacts';
+
 
 const ContactUs = () => {
     const navigate = useNavigate();
@@ -66,7 +68,7 @@ const ContactUs = () => {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Email Us</p>
-                                <p className="text-xl font-black text-gray-900">info@saaviksolutions.com</p>
+                                <p className="text-xl font-black text-gray-900">{CONTACTS.support.email}</p>
                             </div>
                         </div>
 
@@ -76,7 +78,7 @@ const ContactUs = () => {
                             </div>
                             <div className="space-y-1">
                                 <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Call Center</p>
-                                <p className="text-xl font-black text-gray-900">+1 (408) 741 6969</p>
+                                <p className="text-xl font-black text-gray-900">{CONTACTS.support.phone}</p>
                             </div>
                         </div>
 

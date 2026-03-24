@@ -5,6 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import heroSuccess from '@/assets/hero_mobile_cartoon.png';
 import heroScholarship from '@/assets/loan_hero.png';
 import heroDestinations from '@/assets/destinations_hero.png';
+import visaSuccessHero from '@/assets/visa_success_hero.png';
+import universityMatchHero from '@/assets/university_match_hero.png';
+import ieltsPrepHero from '@/assets/ielts_prep_hero.png';
+import preDepartureHero from '@/assets/pre_departure_hero.png';
+import accommodationHero from '@/assets/accommodation_hero.png';
 
 interface SlideProps {
   onBookingClick: () => void;
@@ -165,3 +170,195 @@ export const DestinationsSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
       </div>
     );
   };
+
+export const VisaSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
+      <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
+          <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
+            Visa Compliance Excellence
+          </div>
+          <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
+            Seamless <br />
+            <span className="text-emerald-600">Visa</span> <br />
+            Approvals.
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+            Over 98% success rate with expert documentation auditing, mock interviews, and direct embassy compliance support.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-5 pt-4">
+            <button
+              onClick={() => navigate('/contact')}
+              className="px-8 md:px-10 py-4 md:py-5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all hover:translate-y-[-2px] shadow-xl shadow-emerald-900/10"
+            >
+              Start Application
+            </button>
+            <button
+              onClick={onBookingClick}
+              className="px-8 md:px-10 py-4 md:py-5 bg-white border border-slate-200 text-slate-900 font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+            >
+              Book Mock Interview
+            </button>
+          </div>
+        </div>
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
+            <div className="relative p-3 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-inner group">
+                <img src={visaSuccessHero} alt="Visa Success" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700" />
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const UniversityMatchSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
+      <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
+          <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
+            AI-Powered Matchmaking
+          </div>
+          <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
+            Perfect <br />
+            <span className="text-blue-600">University</span> <br />
+            Matching.
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+            Our proprietary AI platform matches you with the best-fit universities based on your profile, career goals, and budget.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-5 pt-4">
+            <button
+              onClick={() => navigate('/about')}
+              className="px-8 md:px-10 py-4 md:py-5 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all hover:translate-y-[-2px] shadow-xl shadow-blue-900/10"
+            >
+              Analyze My Profile
+            </button>
+          </div>
+        </div>
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
+            <div className="relative p-3 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-inner group">
+                <img src={universityMatchHero} alt="University Match" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700" />
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const IELTSSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
+      <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
+          <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-rose-700 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
+            Language Proficiency Hub
+          </div>
+          <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
+            Master <br />
+            <span className="text-rose-600">IELTS / PTE</span> <br />
+            with Ease.
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+            Custom coaching plans and professional trainers focused on helping you achieve a band score of 7.5+ in your first attempt.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-5 pt-4">
+            <button
+              onClick={() => navigate('/contact')}
+              className="px-8 md:px-10 py-4 md:py-5 bg-rose-600 text-white font-bold rounded-2xl hover:bg-rose-700 transition-all hover:translate-y-[-2px] shadow-xl shadow-rose-900/10"
+            >
+              Join Classes
+            </button>
+            <button
+              onClick={onBookingClick}
+              className="px-8 md:px-10 py-4 md:py-5 bg-white border border-slate-200 text-slate-900 font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+            >
+              Get Free Demo
+            </button>
+          </div>
+        </div>
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
+            <div className="relative p-3 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-inner group">
+                <img src={ieltsPrepHero} alt="IELTS Prep" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700" />
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const PreDepartureSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
+      <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
+          <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 text-amber-700 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
+            Orientation & Beyond
+          </div>
+          <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
+            Smooth <br />
+            <span className="text-amber-600">Transition</span> <br />
+            Abroad.
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+            Pre-departure briefings, airport pickups, and initial settlement support to ensure you feel at home the moment you land.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-5 pt-4">
+            <button
+              onClick={() => navigate('/about')}
+              className="px-8 md:px-10 py-4 md:py-5 bg-amber-600 text-white font-bold rounded-2xl hover:bg-amber-700 transition-all hover:translate-y-[-2px] shadow-xl shadow-amber-900/10"
+            >
+              Learn More
+            </button>
+          </div>
+        </div>
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
+            <div className="relative p-3 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-inner group">
+                <img src={preDepartureHero} alt="Pre-Departure" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700" />
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const AccommodationSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
+      <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
+          <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-violet-50 border border-violet-100 text-violet-700 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
+            Premium Living Solutions
+          </div>
+          <h2 className="text-[28px] sm:text-[32px] md:text-[54px] lg:text-[72px] font-black text-[#0f172a] leading-[1.1] md:leading-[1.05] tracking-tight font-bricolage">
+            Curated <br />
+            <span className="text-violet-600">Living</span> <br />
+            Spaces.
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-slate-500 max-w-xl leading-relaxed font-medium">
+            Affordable and secure student accommodation options near your university campus, personally vetted by our local team.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-5 pt-4">
+            <button
+              onClick={() => navigate('/contact')}
+              className="px-8 md:px-10 py-4 md:py-5 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-700 transition-all hover:translate-y-[-2px] shadow-xl shadow-violet-900/10"
+            >
+              Browse Options
+            </button>
+          </div>
+        </div>
+        <div className="relative order-1 lg:order-2 mt-8 lg:mt-0 animate-fade-in-right">
+            <div className="relative p-3 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-inner group">
+                <img src={accommodationHero} alt="Accommodation" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover rounded-[3rem] grayscale-[0.1] group-hover:grayscale-0 transition-all duration-700" />
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -65,7 +65,7 @@ const AIChatWidget: React.FC = () => {
                 return updated;
             });
         } catch {
-            setMessages(prev => [...prev, { role: 'assistant', content: "Connection interrupted. Our executive team is available at **+91 97790 46382** for immediate support.", streaming: false }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: "Connection interrupted. Our executive team is available at **+1 408 741 6166** for immediate support.", streaming: false }]);
         } finally {
             setIsLoading(false);
         }

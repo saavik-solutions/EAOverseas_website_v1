@@ -314,11 +314,11 @@ const Navbar = () => {
 
                         {/* Mobile Phone */}
                         <a
-                            href="tel:+919779046382"
+                            href="tel:+14087416166"
                             className="flex items-center justify-center gap-2 text-[#7a29c2] font-semibold text-sm py-2"
                         >
                             <span className="material-symbols-outlined text-[17px]">call</span>
-                            +91 97790 46382
+                            +1 (408) 741 6166
                         </a>
                     </div>
                 </div>

@@ -68,8 +68,8 @@ const CookiePolicy = () => {
                             If you have questions about our cookie policy, please contact us:
                         </p>
                         <div className="space-y-1.5 md:space-y-2 text-gray-600 text-sm md:text-base">
-                            <p>Email: info@saaviksolutions.com</p>
-                            <p>Phone: +1 (408) 741 6969</p>
+                            <p>Email: edu@eaoverseas.com</p>
+                            <p>Phone: +1 (408) 741 6166</p>
                         </div>
                     </div>
                 </section>

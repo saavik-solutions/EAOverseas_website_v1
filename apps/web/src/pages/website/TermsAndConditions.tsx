@@ -219,11 +219,11 @@ const TermsAndConditions = () => {
                                     <ul className="space-y-2 text-sm md:text-base">
                                         <li className="flex items-center gap-3">
                                             <span className="material-symbols-outlined text-[#3f6ee4] text-[20px]">mail</span>
-                                            <span><span className="font-semibold">Email:</span> info@saaviksolutions.com</span>
+                                            <span><span className="font-semibold">Email:</span> edu@eaoverseas.com</span>
                                         </li>
                                         <li className="flex items-center gap-3">
                                             <span className="material-symbols-outlined text-[#3f6ee4] text-[20px]">phone</span>
-                                            <span><span className="font-semibold">Phone:</span> +91 97015 63362</span>
+                                            <span><span className="font-semibold">Phone:</span> +1 (408) 741 6166</span>
                                         </li>
                                     </ul>
                                 </div>
