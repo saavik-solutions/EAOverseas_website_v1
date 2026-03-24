@@ -15,7 +15,7 @@ export const MainSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
   return (
     <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
       <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
-        <div className="space-y-6 md:space-y-8 animate-fade-in-up">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
           <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-500 font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
@@ -78,7 +78,7 @@ export const ScholarshipSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
   return (
     <div className="relative w-full min-h-[500px] md:min-h-[550px] md:h-full flex items-center justify-center overflow-hidden pt-28 pb-10 md:pt-40 md:pb-20">
       <div className="max-w-[1400px] w-full px-6 lg:px-16 grid lg:grid-cols-2 gap-10 md:gap-24 items-center z-10 text-left">
-        <div className="space-y-6 md:space-y-8 animate-fade-in-up">
+        <div className="space-y-6 md:space-y-8 animate-fade-in-up order-2 lg:order-1">
           <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-[#7a29c2] font-bold text-[10px] md:text-[11px] tracking-[0.2em] uppercase">
             Financial Strategy & Awards
           </div>
