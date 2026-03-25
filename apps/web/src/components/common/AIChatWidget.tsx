@@ -42,8 +42,13 @@ const AIChatWidget: React.FC = () => {
             for await (const token of stream) {
                 setMessages(prev => {
                     const updated = [...prev];
-                    const last = updated[updated.length - 1];
-                    if (last && last.role === 'assistant') { last.content += token; }
+                    const lastIdx = updated.length - 1;
+                    if (updated[lastIdx] && updated[lastIdx].role === 'assistant') {
+                        updated[lastIdx] = { 
+                            ...updated[lastIdx], 
+                            content: updated[lastIdx].content + token 
+                        };
+                    }
                     return updated;
                 });
             }
