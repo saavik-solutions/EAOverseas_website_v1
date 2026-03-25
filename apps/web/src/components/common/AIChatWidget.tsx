@@ -178,29 +178,30 @@ const AIChatWidget: React.FC = () => {
                 )}
 
                 {/* ── Floating Launcher ── */}
-                <div className={`pointer-events-auto relative inline-flex flex-col items-end transition-all duration-700
-                    ${(isOpen && !isMinimized) ? 'hidden' : 'flex'}`}>
-                    {showTooltip && (
-                        <div className="absolute bottom-[90px] right-0 mb-2 whitespace-nowrap bg-[#1a1c2d] text-white text-[13px] font-black uppercase tracking-[0.15em] px-5 py-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] animate-[execTooltip_0.6s_ease-out]">
-                            Expert AI Online
-                            <div className="absolute bottom-[-6px] right-8 w-4 h-4 bg-[#1a1c2d] rotate-45"></div>
-                        </div>
-                    )}
-                    <button
-                        onClick={() => { if (isMinimized) setIsMinimized(false); else setIsOpen(!isOpen); setShowTooltip(false); }}
-                        className={`group relative w-[76px] h-[76px] rounded-[1.75rem] flex items-center justify-center transition-all duration-500 hover:rotate-3 shadow-2xl overflow-hidden
-                            ${isOpen && !isMinimized ? 'bg-slate-900' : 'bg-white border border-slate-100'}`}
-                    >
-                        <span className={`material-symbols-outlined text-[32px] font-bold transition-all duration-500 ${isOpen && !isMinimized ? 'text-white' : 'text-[#7a29c2]'}`}>
-                            {isMinimized ? 'unfold_more' : 'auto_awesome'}
-                        </span>
+                {!isFullView && (
+                    <div className="pointer-events-auto relative inline-flex flex-col items-end transition-all duration-700 flex">
+                        {showTooltip && (
+                            <div className="absolute bottom-[90px] right-0 mb-2 whitespace-nowrap bg-[#1a1c2d] text-white text-[13px] font-black uppercase tracking-[0.15em] px-5 py-4 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] animate-[execTooltip_0.6s_ease-out]">
+                                Expert AI Online
+                                <div className="absolute bottom-[-6px] right-8 w-4 h-4 bg-[#1a1c2d] rotate-45"></div>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => { if (isMinimized) setIsMinimized(false); else setIsOpen(!isOpen); setShowTooltip(false); }}
+                            className={`group relative w-[76px] h-[76px] rounded-[1.75rem] flex items-center justify-center transition-all duration-500 hover:rotate-3 shadow-2xl overflow-hidden
+                                ${isOpen && !isMinimized ? 'bg-slate-900' : 'bg-white border border-slate-100'}`}
+                        >
+                            <span className={`material-symbols-outlined text-[32px] font-bold transition-all duration-500 ${isOpen && !isMinimized ? 'text-white' : 'text-[#7a29c2]'}`}>
+                                {isMinimized ? 'unfold_more' : 'auto_awesome'}
+                            </span>
+                        </button>
                         {!isOpen && (
-                            <span className="absolute -top-1.5 -right-1.5 w-7 h-7 bg-[#7a29c2] border-4 border-white rounded-xl shadow-lg flex items-center justify-center">
-                                <span className="text-[10px] font-black text-white">AI</span>
+                            <span className="absolute -top-1 -right-1 w-7 h-7 bg-[#7a29c2] border-4 border-white rounded-xl shadow-lg flex items-center justify-center z-10 pointer-events-none">
+                                <span className="text-[10px] font-black text-white leading-none">AI</span>
                             </span>
                         )}
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
 
             <style>{`
