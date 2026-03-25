@@ -5,6 +5,7 @@ import MainLayout from '@/layouts/MainLayout';
 import WebsiteLayout from '@/layouts/WebsiteLayout';
 import LandingPage from '@/pages/website/LandingPage';
 import TermsAndConditions from '@/pages/website/TermsAndConditions';
+import NotFound from '@/pages/website/NotFound';
 import CookiePolicy from '@/pages/website/CookiePolicyPage';
 import PrivacyPolicy from '@/pages/website/PrivacyPolicyPage';
 import AboutUs from '@/pages/website/AboutUs';
@@ -24,6 +25,7 @@ import AdminLayout from '@/layouts/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import BlogManagement from '@/pages/admin/BlogManagement';
 import LeadVault from '@/pages/admin/LeadVault';
+
 // Heavy routes lazy loaded for performance
 const Feed = React.lazy(() => import('@/pages/dashboard/Feed'));
 const CommunityFeed = React.lazy(() => import('@/pages/dashboard/CommunityFeed'));
@@ -335,8 +337,6 @@ function App() {
                                             <Route path="users" element={<SuperAdminUserManagement />} />
                                             <Route path="inquiries" element={<SuperAdminInquiries />} />
 
-
-
                                             {/* Nested University Portal routes */}
                                             <Route path="university-portal">
                                                 <Route path="posts-feed" element={<SuperAdminPostFeedDashboard />} />
@@ -371,6 +371,9 @@ function App() {
                                         <Route path="/university/post-center" element={<PostCenter />} />
                                         <Route path="/university/scholarship-analytics" element={<ScholarshipAnalytics />} />
                                         <Route path="/university/programs" element={<Navigate to="/Superadmin/university-portal/posts-feed" replace />} />
+
+                                        {/* Catch-all 404 Route */}
+                                        <Route path="*" element={<NotFound />} />
                                     </Routes>
                                 </BrowserRouter>
                             </ApplicationsProvider>
@@ -382,6 +385,4 @@ function App() {
     );
 }
 
-
 export default App;
-

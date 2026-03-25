@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { CONTACTS } from '@/shared/constants/contacts';
+import { SEOHead } from '@/components/common/SEOHead';
 
 
 const ContactUs = () => {
@@ -47,6 +48,11 @@ const ContactUs = () => {
 
     return (
         <div className="relative min-h-[900px] w-full overflow-hidden bg-white">
+            <SEOHead 
+                title="Contact Us | EAOverseas"
+                description="Get in touch with our global education strategists to start architecting your global future."
+                image="/assets/visa_success_hero.png"
+            />
             {/* Premium Background Layers */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#f3e8ff_0%,transparent_50%)] opacity-70"></div>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,#eef2ff_0%,transparent_50%)] opacity-70"></div>

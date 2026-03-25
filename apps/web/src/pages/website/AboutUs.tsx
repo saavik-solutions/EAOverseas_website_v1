@@ -4,6 +4,7 @@ import { useAuth } from '@/shared/contexts/AuthContext';
 import blogDestinations from '@/features/landing/assets/blog_destinations.png';
 import blogIelts from '@/features/landing/assets/blog_ielts.png';
 import blogVisa from '@/features/landing/assets/blog_visa.png';
+import { SEOHead } from '@/components/common/SEOHead';
 
 const Counter = ({ end, duration = 2000 }) => {
     const [count, setCount] = useState(0);
@@ -76,6 +77,11 @@ const AboutUs = () => {
 
     return (
         <div className="max-w-[1440px] mx-auto px-6 md:px-12">
+            <SEOHead 
+                title="About Us | EAOverseas"
+                description="Learn about our mission to empower global scholars through data-driven insights and ethical guidance."
+                image="/assets/student_story_hero.png"
+            />
             {/* Hero Section */}
                 <section className="relative py-12 md:py-32 overflow-hidden">
                     {/* Hero Background Glow */}

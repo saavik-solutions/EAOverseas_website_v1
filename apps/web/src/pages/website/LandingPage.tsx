@@ -44,6 +44,11 @@ const LandingPage = () => {
 
     return (
         <div className="min-h-screen bg-white relative font-sans text-[#111418] overflow-x-hidden">
+            <SEOHead 
+                title="EAOverseas | Best Overseas Education Consultants"
+                description="Your trusted strategic partner for global education. Expert university matching, scholarship guidance, and visa success."
+                image="/assets/hero_mobile_cartoon.png"
+            />
             {/* Unified Grid Background */}
             <div className="absolute inset-0 bg-grid-purple opacity-50 pointer-events-none z-0"></div>
 
@@ -76,7 +81,7 @@ const LandingPage = () => {
 
 
                 {/* Marquee Trust Strip — just below Hero */}
-                <div className="w-[100vw] ml-[calc(-50vw+50%)] overflow-hidden relative py-5 bg-transparent" aria-hidden="true">
+                <div className="w-full overflow-hidden relative py-5 bg-transparent" aria-hidden="true">
                     {/* Fade edges */}
                     <div className="absolute top-0 bottom-0 left-0 w-[120px] max-sm:w-[60px] bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
                     <div className="absolute top-0 bottom-0 right-0 w-[120px] max-sm:w-[60px] bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />

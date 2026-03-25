@@ -11,11 +11,11 @@ interface SEOHeadProps {
 export function SEOHead({ 
     title, 
     description, 
-    image = 'https://eaoverseas.com/og-default.jpg', // Placeholder for default OG image
+    image = 'https://eaoverseas.com/assets/logo.png', // Official Logo Fallback
     url = 'https://eaoverseas.com',
     type = 'website'
 }: SEOHeadProps) {
-    const siteTitle = `${title} | EAOverseas`;
+    const siteTitle = title.includes('EAOverseas') ? title : `${title} | EAOverseas`;
 
     return (
         <Helmet>

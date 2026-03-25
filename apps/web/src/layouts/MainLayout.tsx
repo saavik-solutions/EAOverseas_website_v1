@@ -7,6 +7,7 @@ import { useNotification } from '@/shared/contexts/NotificationContext';
 import NotificationDropdown from '@/features/notifications/NotificationDropdown';
 import LoginModal from '@/features/auth/LoginModal';
 import { useRef, useEffect } from 'react';
+import { CookieConsentBanner } from '@/components/common/CookieConsentBanner';
 
 const MainLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -105,11 +106,11 @@ const MainLayout = () => {
                 <Outlet />
             </div>
 
-            {/* Global Login Modal */}
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setLoginModalOpen(false)}
             />
+            <CookieConsentBanner />
         </div>
     );
 };

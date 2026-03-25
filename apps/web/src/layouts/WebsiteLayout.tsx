@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { CookieConsentBanner } from '@/components/common/CookieConsentBanner';
 
 /**
  * WebsiteLayout provides a consistent wrapper for all public-facing website sub-pages.
@@ -27,6 +28,7 @@ const WebsiteLayout = () => {
 
                 <Footer />
             </div>
+            <CookieConsentBanner />
         </div>
     );
 };

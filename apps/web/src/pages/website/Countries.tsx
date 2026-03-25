@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/shared/contexts/AuthContext';
+import { SEOHead } from '@/components/common/SEOHead';
 
 const Countries = () => {
     const navigate = useNavigate();
@@ -127,6 +128,11 @@ const Countries = () => {
 
     return (
         <>
+            <SEOHead 
+                title="Study Destinations | EAOverseas"
+                description="Explore top global study destinations and find your perfect academic home with AI-powered insights."
+                image="/assets/destinations_hero.png"
+            />
             {/* Hero Section with Abstract Map */}
                 {/* Hero Section with Abstract Map */}
                 <div className="relative w-full bg-transparent overflow-hidden py-12 md:py-20 px-4 md:px-20 lg:px-40">

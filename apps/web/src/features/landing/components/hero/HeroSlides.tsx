@@ -38,7 +38,7 @@ export const MainSlide: React.FC<SlideProps> = ({ onBookingClick }) => {
           </p>
           <div className="flex flex-col sm:flex-row gap-5 pt-4">
             <button
-              onClick={() => navigate('/about')}
+              onClick={() => window.location.href = 'https://student.eaoverseas.com'}
               className="group relative px-8 md:px-10 py-4 md:py-5 bg-[#0f172a] text-white font-bold rounded-2xl overflow-hidden transition-all hover:bg-[#1e293b] hover:translate-y-[-2px] active:translate-y-[0px] shadow-xl shadow-slate-900/10"
             >
               Consult an Expert
