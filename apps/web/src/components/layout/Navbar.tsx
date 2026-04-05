@@ -295,22 +295,7 @@ const Navbar = () => {
                             Check Eligibility
                         </button>
 
-                        {!user ? (
-                            <button
-                                onClick={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
-                                className="w-full bg-[#ffda6b] hover:bg-[#ffcf3d] text-[#0e121b] font-black py-3.5 rounded-2xl shadow-md shadow-yellow-200/50 uppercase tracking-widest"
-                            >
-                                Sign In
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => { logout(); setIsMobileMenuOpen(false); }}
-                                className="w-full text-red-500 font-bold py-3 flex items-center justify-center gap-2 rounded-xl hover:bg-red-50 transition-colors"
-                            >
-                                <span className="material-symbols-outlined">logout</span>
-                                Logout
-                            </button>
-                        )}
+                        {/* Authentication buttons removed for simplified mobile UI */}
 
                         {/* Mobile Phone */}
                         <a
