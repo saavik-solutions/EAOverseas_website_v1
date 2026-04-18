@@ -52,7 +52,7 @@ const Navbar = () => {
         { name: 'About', path: '/about' },
         { name: 'Countries', path: '/countries', hasDropdown: true },
         { name: 'Blogs', path: '/blogs' },
-        { name: 'Community', path: 'https://student.eaoverseas.com', external: true },
+        { name: 'Dashboard', path: 'https://student.eaoverseas.com', external: true },
         { name: 'Contact Us', path: '/contact' },
         { name: 'Our Experts', sectionId: 'our-experts' },
         { name: 'FAQ', sectionId: 'faq' },

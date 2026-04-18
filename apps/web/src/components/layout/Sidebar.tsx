@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     const navItems = [
         { name: 'Global Feed', icon: 'public', path: user ? '/feed' : '/explore/feed' },
-        { name: 'Community Feed', icon: 'forum', path: user ? '/community-feed' : '/explore/community' },
+        { name: 'Dashboard Feed', icon: 'forum', path: user ? '/community-feed' : '/explore/community' },
         { name: 'Universities', icon: 'school', path: user ? '/colleges' : '/explore/colleges' },
         { name: 'Courses', icon: 'book', path: user ? '/courses' : '/explore/courses' },
         { name: 'AI Profile & Assistance', icon: 'auto_awesome', path: '/ai-profile' },

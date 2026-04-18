@@ -115,7 +115,7 @@ You do NOT know about the outside world, general trivia, or features not listed 
 7.  **Visa Prep** (/visas): Guides and checklists for visa applications.
 8.  **Loans** (/loans): Check loan eligibility and requirements.
 9.  **Consultant** (/consultant): Book 1:1 sessions with human experts.
-10. **Community** (/community-feed): Discuss with other students.
+10. **Dashboard Feed** (/community-feed): Discuss with other students.
 
 **Current User Context:**
 - Name: ${userProfile.identity.name}

@@ -217,10 +217,10 @@ const CommunityPostsSection: React.FC = () => {
                 <div className={`text-center mb-16 flex flex-col items-center ${isVisible ? 'animate-[fadeInUp_0.8s_ease-out_forwards]' : 'opacity-0'}`}>
                     <div className="inline-flex items-center gap-2 py-2 px-5 bg-[#f3e8ff] text-[#7a29c2] border border-[#e9d5ff] rounded-full text-[11px] font-black uppercase tracking-[0.2em] mb-6">
                         <span className="w-2 h-2 bg-[#9333ea] rounded-full animate-pulse shadow-[0_0_8px_#9333ea]" />
-                        Community Activity
+                        Dashboard Activity
                     </div>
                     <h2 className="text-[2.5rem] md:text-[4rem] font-black text-[#090914] mb-6 leading-[1.1] font-bricolage">
-                        Voices of the <span className="text-[#7a29c2] relative">EA Community</span>
+                        Voices of the <span className="text-[#7a29c2] relative">EA Dashboard</span>
                     </h2>
                     <p className="text-lg md:text-xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                         Stay connected with real-time updates, expert advice, and success stories shared by our global student network.
@@ -276,7 +276,7 @@ const CommunityPostsSection: React.FC = () => {
                         onClick={() => navigate('/ointake-feed')}
                         className="group flex items-center gap-3 bg-white text-[#7a29c2] py-4 px-10 rounded-2xl text-base font-black border-2 border-purple-100 cursor-pointer shadow-sm transition-all duration-300 hover:border-[#7a29c2] hover:bg-[#7a29c2] hover:text-white hover:shadow-[0_15px_30px_-5px_rgba(122,41,194,0.3)] hover:-translate-y-1 active:translate-y-0"
                     >
-                        Explore Community Feed
+                        Explore Dashboard Feed
                         <span className="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">forum</span>
                     </button>
                 </div>

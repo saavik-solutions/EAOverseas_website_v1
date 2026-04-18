@@ -45,7 +45,7 @@ const Footer = () => {
     { name: 'Scholarship Database',   path: FALLBACK, external: true },
     { name: 'Visa Checklists',        path: FALLBACK, external: true },
     { name: 'IELTS Preparation',      path: FALLBACK, external: true },
-    { name: 'Community Feed',         path: FALLBACK, external: true },
+    { name: 'Dashboard Feed',         path: FALLBACK, external: true },
   ];
 
   const quickLinks = [
